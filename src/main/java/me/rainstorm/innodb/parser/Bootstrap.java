@@ -7,6 +7,7 @@ import org.apache.commons.cli.ParseException;
 import java.util.Arrays;
 
 import static me.rainstorm.innodb.parser.constant.Constants.verbose;
+import static me.rainstorm.innodb.parser.options.CommandLineArgsHelper.printHelp;
 
 /**
  * @author traceless
@@ -19,11 +20,7 @@ public class Bootstrap {
             commandLineArgsHelper = new CommandLineArgsHelper(args);
         } catch (ParseException e) {
             log.error(e.getMessage(), e);
-            try {
-                new CommandLineArgsHelper().printHelp();
-            } catch (ParseException parseException) {
-                log.error(e.getMessage(), e);
-            }
+            printHelp();
             return;
         }
 
@@ -33,7 +30,7 @@ public class Bootstrap {
         }
 
         if (commandLineArgsHelper.withoutOptions() || commandLineArgsHelper.isHelp()) {
-            commandLineArgsHelper.printHelp();
+            printHelp();
             return;
         }
 
