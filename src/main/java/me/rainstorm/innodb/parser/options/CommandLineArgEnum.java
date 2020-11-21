@@ -12,7 +12,8 @@ public enum CommandLineArgEnum {
     Help('h', "help", false, "打印帮助文档"),
     Version('v', "version", false, "打印版本号"),
     Verbose('V', "verbose", false, "打印更详细的信息"),
-    SystemTableSpace('s', "system-tablespace-file", false, true, "系统表空间文件，绝对路径", "/var/lib/mysql/ibdata1"),
+    DataDir('r', "root-dir-of-data", false, true, "数据目录，所有表空间默认在该目录下", "/var/lib/mysql"),
+    SystemTableSpace('s', "system-tablespace-file", false, true, "系统表空间文件路径，-r 的相对路径", "ibdata1"),
     Database('d', "database", true, "需要分析的数据库名称"),
     TableName('t', "table", true, "需要分析的表名"),
     Page('p', "page", true, "需要分析的表空间页号，页号从 0 开始");
@@ -44,6 +45,7 @@ public enum CommandLineArgEnum {
     CommandLineArgEnum(char opt, String longOpt, boolean required, boolean hasArg, String desc) {
         this(opt, longOpt, required, hasArg, desc, null);
     }
+
 
     /**
      * 含长选项的命令行参数
@@ -79,7 +81,6 @@ public enum CommandLineArgEnum {
             return getShortOpt();
         }
     }
-
 
     public String getLongOptWithDefaultValue() {
         if (option.hasArg()) {

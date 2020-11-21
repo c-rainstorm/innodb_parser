@@ -12,7 +12,7 @@ import static me.rainstorm.innodb.parser.constant.Constants.MYSQL_INNODB_VERSION
  */
 @Slf4j
 public class CommandLineArgsHelper {
-    private static final HelpFormatter formatter = new HelpFormatter();
+    private static final HelpFormatter FORMATTER = new HelpFormatter();
 
     private final CommandLine commandLineParsed;
 
@@ -21,9 +21,9 @@ public class CommandLineArgsHelper {
     }
 
     public static void printHelp() {
-        formatter.printHelp("java -jar /path/to/your/innodb-parser.jar " + requiredArg() +
+        FORMATTER.printHelp("java -jar /path/to/your/innodb-parser.jar " + requiredArg() +
                         " [OPTION]...\n" +
-                        "根据选项解析 Innodb 数据文件",
+                        "根据选项解析 Innodb 数据文件，目前支持系统表空间页和独立表空间部分页的分析，具体说明请查看 README",
                 "====================================",
                 CommandLineArgEnum.getOptions(),
                 "====================================\n如有问题，可以联系 pom.xml 中的开发者");
