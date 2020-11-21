@@ -30,14 +30,14 @@ public class BootstrapTest {
     public void table(String systemSpace, String database, String table) {
         List<String> args = new ArrayList<>();
 
-        args.add(CommandLineArgEnum.SystemSpace.getLongOpt() + "=" + systemSpace + " ");
+        args.add(CommandLineArgEnum.SystemTableSpace.getLongOpt() + "=" + systemSpace + " ");
 
         if (StringUtils.isNoneBlank(database)) {
             args.add(CommandLineArgEnum.Database.getLongOpt() + "=" + database + " ");
         }
 
         if (StringUtils.isNoneBlank(table)) {
-            args.add(CommandLineArgEnum.Table.getLongOpt() + "=" + table + " ");
+            args.add(CommandLineArgEnum.TableName.getLongOpt() + "=" + table + " ");
         }
 
         args.add(CommandLineArgEnum.Verbose.getLongOpt());

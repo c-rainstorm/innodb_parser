@@ -12,9 +12,10 @@ public enum CommandLineArgEnum {
     Help('h', "help", false, "打印帮助文档"),
     Version('v', "version", false, "打印版本号"),
     Verbose('V', "verbose", false, "打印更详细的信息"),
-    SystemSpace('s', "system-space-file", false, true, "系统表空间文件，绝对路径", "/var/lib/mysql"),
+    SystemTableSpace('s', "system-tablespace-file", false, true, "系统表空间文件，绝对路径", "/var/lib/mysql/ibdata1"),
     Database('d', "database", true, "需要分析的数据库名称"),
-    Table('t', "table", true, "需要分析的表名");
+    TableName('t', "table", true, "需要分析的表名"),
+    Page('p', "page", true, "需要分析的表空间页号，页号从 0 开始");
 
     private final char opt;
     private String defaultValue;
