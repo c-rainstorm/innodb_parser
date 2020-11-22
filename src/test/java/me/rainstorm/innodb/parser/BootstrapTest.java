@@ -1,7 +1,14 @@
 package me.rainstorm.innodb.parser;
 
-import me.rainstorm.innodb.parser.options.CommandLineArgEnum;
-import org.apache.commons.lang3.StringUtils;
+import me.rainstorm.innodb.parser.options.CommandLineArgs;
+import me.rainstorm.innodb.parser.options.CommandLineOptionEnum;
+import me.rainstorm.innodb.parser.strategy.cles.CommandLineExecuteStrategy;
+import me.rainstorm.innodb.parser.strategy.cles.level_1.HelpStrategy;
+import me.rainstorm.innodb.parser.strategy.cles.level_1.VersionStrategy;
+import me.rainstorm.innodb.parser.strategy.cles.level_2.FilePerTableTableSpacePages;
+import me.rainstorm.innodb.parser.strategy.cles.level_2.SystemTableSpaceAllPage;
+import org.apache.commons.cli.ParseException;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -11,37 +18,66 @@ import java.util.List;
 
 public class BootstrapTest {
     @Test
-    public void none() {
-        Bootstrap.main(new String[]{});
+    public void none() throws ParseException {
+        String[] args = new String[]{};
+
+        strategyAssert(args, HelpStrategy.class);
+
+        Bootstrap.main(args);
     }
 
     @Test
-    public void help() {
-        Bootstrap.main(new String[]{CommandLineArgEnum.Help.getLongOpt()});
+    public void help() throws ParseException {
+        String[] args = new String[]{CommandLineOptionEnum.Help.getLongOpt()};
+
+        strategyAssert(args, HelpStrategy.class);
+
+        Bootstrap.main(args);
     }
 
     @Test
-    public void version() {
-        Bootstrap.main(new String[]{CommandLineArgEnum.Version.getLongOpt()});
+    public void version() throws ParseException {
+        String[] args = new String[]{CommandLineOptionEnum.Version.getLongOpt()};
+
+        strategyAssert(args, VersionStrategy.class);
+
+        Bootstrap.main(args);
+    }
+
+    @ParameterizedTest
+    @CsvSource("/tmp/mysql/")
+    public void systemSpaceAllPage(String dataDir) throws ParseException {
+        List<String> argsList = new ArrayList<>();
+
+        argsList.add(CommandLineOptionEnum.DataDir.getLongOpt() + "=" + dataDir);
+
+        argsList.add(CommandLineOptionEnum.Verbose.getLongOpt());
+
+        String[] args = argsList.toArray(new String[0]);
+
+        strategyAssert(args, SystemTableSpaceAllPage.class);
+
+        Bootstrap.main(args);
     }
 
     @ParameterizedTest
     @CsvSource("/tmp/mysql/,sparrow,test")
-    public void table(String systemSpace, String database, String table) {
-        List<String> args = new ArrayList<>();
+    public void FilePerTableTableSpacePages(String dataDir, String database, String table) throws ParseException {
+        String[] args = new String[]{
+                CommandLineOptionEnum.DataDir.getLongOpt() + "=" + dataDir,
+                CommandLineOptionEnum.Database.getLongOpt() + "=" + database,
+                CommandLineOptionEnum.Table.getLongOpt() + "=" + table
+        };
 
-        args.add(CommandLineArgEnum.SystemTableSpace.getLongOpt() + "=" + systemSpace + " ");
+        strategyAssert(args, FilePerTableTableSpacePages.class);
 
-        if (StringUtils.isNoneBlank(database)) {
-            args.add(CommandLineArgEnum.Database.getLongOpt() + "=" + database + " ");
-        }
+        Bootstrap.main(args);
+    }
 
-        if (StringUtils.isNoneBlank(table)) {
-            args.add(CommandLineArgEnum.TableName.getLongOpt() + "=" + table + " ");
-        }
-
-        args.add(CommandLineArgEnum.Verbose.getLongOpt());
-
-        Bootstrap.main(args.toArray(new String[0]));
+    private void strategyAssert(String[] args, Class<? extends CommandLineExecuteStrategy> expectedStrategyClass) throws ParseException {
+        CommandLineArgs commandLineArgs = new CommandLineArgs(args);
+        Bootstrap.setGlobalConstants(commandLineArgs);
+        CommandLineExecuteStrategy strategy = Bootstrap.findExecuteStrategy(commandLineArgs);
+        Assertions.assertEquals(expectedStrategyClass, strategy.getClass());
     }
 }
