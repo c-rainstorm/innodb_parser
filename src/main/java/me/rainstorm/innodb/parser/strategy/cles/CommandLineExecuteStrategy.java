@@ -12,7 +12,9 @@ import java.util.ServiceLoader;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import static me.rainstorm.innodb.parser.ParserConstants.verbose;
+import static me.rainstorm.innodb.common.i18n.I18nMsgCodeEnum.LogCommandLineExecuteStrategyMatchOrder;
+import static me.rainstorm.innodb.common.i18n.I18nUtil.message;
+import static me.rainstorm.innodb.parser.ParserConstants.VERBOSE;
 
 /**
  * @author traceless
@@ -30,10 +32,10 @@ public abstract class CommandLineExecuteStrategy extends AbstractStrategy<Comman
     }
 
     public static Optional<CommandLineExecuteStrategy> discover(CommandLineArgs commandLineArgs) {
-        if (verbose && log.isDebugEnabled()) {
+        if (VERBOSE && log.isDebugEnabled()) {
             int i = 0;
             for (CommandLineExecuteStrategy strategy : commandLineExecuteStrategies) {
-                log.debug("已注册的命令行执行策略匹配顺序：{} :{}", ++i, strategy.getClass().getSimpleName());
+                log.debug(message(LogCommandLineExecuteStrategyMatchOrder, ++i, strategy.getClass().getSimpleName()));
             }
         }
 

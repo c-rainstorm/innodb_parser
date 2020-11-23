@@ -1,14 +1,20 @@
 package me.rainstorm.innodb.parser.strategy.cles.level_2;
 
+import lombok.extern.slf4j.Slf4j;
 import me.rainstorm.innodb.domain.page.LogicPage;
-import me.rainstorm.innodb.domain.tablespace.FilePerTableTableSpace;
+import me.rainstorm.innodb.domain.tablespace.IndependentTableSpace;
 import me.rainstorm.innodb.parser.options.CommandLineArgs;
 import me.rainstorm.innodb.parser.options.CommandLineOptionEnum;
 import me.rainstorm.innodb.parser.strategy.cles.CommandLineExecuteStrategy;
 
+import static me.rainstorm.innodb.common.i18n.I18nMsgCodeEnum.LogTableSpaceSummary;
+import static me.rainstorm.innodb.common.i18n.I18nUtil.message;
+import static me.rainstorm.innodb.parser.ParserConstants.VERBOSE;
+
 /**
  * @author traceless
  */
+@Slf4j
 public class FilePerTableTableSpacePages extends CommandLineExecuteStrategy {
     public static final int ORDER = SystemTableSpaceAllPage.ORDER - 1;
 
@@ -24,8 +30,13 @@ public class FilePerTableTableSpacePages extends CommandLineExecuteStrategy {
 
     @Override
     public void execute(CommandLineArgs commandLineArgs) {
-        FilePerTableTableSpace filePerTableTableSpace = new FilePerTableTableSpace(commandLineArgs.filePerTableTableSpace());
+        IndependentTableSpace independentTableSpace = new IndependentTableSpace(commandLineArgs.filePerTableTableSpace());
+        if (VERBOSE && log.isDebugEnabled()) {
+            log.debug(message(LogTableSpaceSummary, independentTableSpace,
+                    independentTableSpace.totalExtendNumber(),
+                    independentTableSpace.totalPageNumber()));
+        }
         System.out.println(LogicPage.title());
-        filePerTableTableSpace.sequentialTraversalIterator().forEachRemaining(System.out::println);
+        independentTableSpace.sequentialTraversalIterator().forEachRemaining(System.out::println);
     }
 }

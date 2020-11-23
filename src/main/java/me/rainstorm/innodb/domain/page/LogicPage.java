@@ -6,6 +6,8 @@ import me.rainstorm.innodb.domain.page.core.FileTrailer;
 import me.rainstorm.innodb.domain.page.core.PageBody;
 import org.apache.commons.lang3.StringUtils;
 
+import static me.rainstorm.innodb.common.i18n.I18nUtil.message;
+
 /**
  * @author traceless
  */
@@ -29,13 +31,18 @@ public abstract class LogicPage<Body extends PageBody> {
     protected abstract Body createPageBody(PhysicalPage physicalPage);
 
     public static String title() {
-        String header = String.format("[%10s][%10s]Page<%s> ...", "PageNo", "SpaceID", "PageType");
-        return header + System.lineSeparator() + StringUtils.repeat("-", header.length());
+        String header = String.format("[%10s][%10s]Page <%s> ...", "PageNo", "SpaceID", "PageType");
+        return header + System.lineSeparator() + StringUtils.repeat("-", 80);
     }
 
     @Override
     public String toString() {
-        return String.format("[%10s][%10d]Page<%s> %s", getPageNo(), fileHeader.getTableSpaceId(), fileHeader.getPageType().getMessageKey(), body);
+        return String.format("[%10s][%10d]Page <%s> %s", getPageNo(), fileHeader.getTableSpaceId(),
+                pageTypeDesc(), body);
+    }
+
+    protected String pageTypeDesc() {
+        return message(fileHeader.getPageType().getMsgCode());
     }
 
     public String getPageNo() {
@@ -44,9 +51,5 @@ public abstract class LogicPage<Body extends PageBody> {
 
     public String verbose() {
         return toString();
-    }
-
-    public PageTypeEnum pageType() {
-        return fileHeader.getPageType();
     }
 }

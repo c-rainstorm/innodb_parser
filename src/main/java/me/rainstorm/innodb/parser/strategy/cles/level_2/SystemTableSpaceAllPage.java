@@ -10,7 +10,9 @@ import me.rainstorm.innodb.parser.strategy.cles.level_1.HelpStrategy;
 
 import java.util.Iterator;
 
-import static me.rainstorm.innodb.parser.ParserConstants.verbose;
+import static me.rainstorm.innodb.common.i18n.I18nMsgCodeEnum.LogTableSpaceSummary;
+import static me.rainstorm.innodb.common.i18n.I18nUtil.message;
+import static me.rainstorm.innodb.parser.ParserConstants.VERBOSE;
 
 /**
  * @author traceless
@@ -33,14 +35,13 @@ public class SystemTableSpaceAllPage extends CommandLineExecuteStrategy {
     public void execute(CommandLineArgs commandLineArgs) {
         SystemTableSpace systemTableSpace = new SystemTableSpace(commandLineArgs.systemTableSpace());
         Iterator<LogicPage<?>> iterator = systemTableSpace.sequentialTraversalIterator();
-        if (verbose && log.isDebugEnabled()) {
-            log.debug("Tablespace {} 总区数 {} 总页数 {}", systemTableSpace,
+        if (VERBOSE && log.isDebugEnabled()) {
+            log.debug(message(LogTableSpaceSummary, systemTableSpace,
                     systemTableSpace.totalExtendNumber(),
-                    systemTableSpace.totalPageNumber());
+                    systemTableSpace.totalPageNumber()));
         }
 
         System.out.println(LogicPage.title());
-        System.out.println();
         iterator.forEachRemaining(System.out::println);
     }
 }

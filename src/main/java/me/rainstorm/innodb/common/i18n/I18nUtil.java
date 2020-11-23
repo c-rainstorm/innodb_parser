@@ -20,7 +20,7 @@ public class I18nUtil {
         I18nUtil.rb = ResourceBundle.getBundle("i18n/message", locale);
     }
 
-    public static String message(String code, Object... args) {
-        return MessageFormat.format(rb.getString(code), args);
+    public static String message(I18nMsgCodeEnum msgCode, Object... args) {
+        return MessageFormat.format(rb.getString(msgCode.name()), args);
     }
 }

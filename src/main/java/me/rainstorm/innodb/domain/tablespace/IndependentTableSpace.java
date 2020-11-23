@@ -5,8 +5,8 @@ import java.nio.file.Path;
 /**
  * @author traceless
  */
-public class FilePerTableTableSpace extends TableSpace {
-    public FilePerTableTableSpace(Path tableSpacePath) {
+public class IndependentTableSpace extends TableSpace {
+    public IndependentTableSpace(Path tableSpacePath) {
         super(tableSpacePath);
     }
 }

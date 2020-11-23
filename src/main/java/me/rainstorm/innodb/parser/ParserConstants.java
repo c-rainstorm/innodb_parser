@@ -8,10 +8,22 @@ import java.util.Locale;
  * @author traceless
  */
 public class ParserConstants {
+    static {
+        reset();
+    }
+
     public static final String INNODB_PARSER_VERSION = "1.0";
-    public static boolean verbose = false;
+    public static boolean VERBOSE;
 
-    public static final Locale LOCALE = SupportedLocaleEnum.EN_US.getLocale();
+    public static Locale LOCALE;
 
-    public static int EXTEND_LRU_CACHE_SIZE = 10;
+    public static int USAGE_WIDTH;
+    public static int EXTEND_LRU_CACHE_SIZE;
+
+    public static void reset() {
+        VERBOSE = false;
+        LOCALE = SupportedLocaleEnum.EN_US.getLocale();
+        USAGE_WIDTH = 120;
+        EXTEND_LRU_CACHE_SIZE = 10;
+    }
 }

@@ -17,6 +17,6 @@ public class AllocatedPage extends LogicPage<Undefined> {
 
     @Override
     public String toString() {
-        return String.format("[%10s][%10s]Page<%s>", "", "", fileHeader.getPageType().getMessageKey());
+        return String.format("[%10s][%10s]Page <%s>", "", "", pageTypeDesc());
     }
 }

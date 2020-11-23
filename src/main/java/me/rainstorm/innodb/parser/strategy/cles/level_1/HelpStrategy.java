@@ -5,6 +5,11 @@ import me.rainstorm.innodb.parser.options.CommandLineOptionEnum;
 import me.rainstorm.innodb.parser.strategy.cles.CLESExecuteWithOutCLA;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
+import org.apache.commons.lang3.StringUtils;
+
+import static me.rainstorm.innodb.common.i18n.I18nMsgCodeEnum.*;
+import static me.rainstorm.innodb.common.i18n.I18nUtil.message;
+import static me.rainstorm.innodb.parser.ParserConstants.USAGE_WIDTH;
 
 /**
  * @author traceless
@@ -25,12 +30,11 @@ public class HelpStrategy extends CLESExecuteWithOutCLA {
 
     @Override
     public void execute() {
-        FORMATTER.printHelp("java -jar /path/to/your/innodb-parser.jar " + requiredArg() +
-                        " [OPTION]...\n" +
-                        "根据选项解析 Innodb 数据文件，具体操作完整 DEMO 请查看 README",
-                "====================================",
+        String dividingLine = StringUtils.repeat('-', USAGE_WIDTH);
+        FORMATTER.printHelp(USAGE_WIDTH, message(OptionUsageSyntax, requiredArg()),
+                message(OptionUsageHeader, dividingLine),
                 CommandLineOptionEnum.getOptions(),
-                "====================================\n如有问题，可以联系 pom.xml 中的开发者");
+                message(OptionUsageFooter, dividingLine));
     }
 
     private static String requiredArg() {
@@ -38,11 +42,7 @@ public class HelpStrategy extends CLESExecuteWithOutCLA {
         for (CommandLineOptionEnum commandLineArg : CommandLineOptionEnum.values()) {
             Option option = commandLineArg.getOption();
             if (option.isRequired()) {
-                if (option.hasLongOpt()) {
-                    builder.append("--").append(option.getLongOpt());
-                } else {
-                    builder.append("-").append(option.getOpt());
-                }
+                builder.append("-").append(option.getOpt());
 
                 if (option.hasArg()) {
                     builder.append("=<arg> ");

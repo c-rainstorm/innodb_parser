@@ -14,7 +14,7 @@ import static me.rainstorm.innodb.domain.InnodbConstants.PAGE_NUM_IN_EXTEND;
 import static me.rainstorm.innodb.domain.InnodbConstants.PAGE_SIZE;
 
 /**
- * 表空间的一个区，
+ * An Extend in TableSpace
  *
  * @author traceless
  */
@@ -32,8 +32,11 @@ public class Extend {
     }
 
     /**
-     * @param pageOffsetInExtend extend 内页偏移量
-     * @return Page
+     * load nth Page in this Extend
+     *
+     * @param pageOffsetInExtend n
+     * @param <Page>             the Page
+     * @return the Page
      */
     public <Page extends LogicPage<? extends PageBody>> Page page(int pageOffsetInExtend) {
         PhysicalPage physicalPage = new PhysicalPage(this, pageOffsetInExtend,

@@ -5,7 +5,9 @@ import me.rainstorm.innodb.domain.page.core.PageBody;
 import me.rainstorm.innodb.domain.page.core.SimplePage;
 import me.rainstorm.innodb.domain.page.xdes.fsp.FileSpaceHeaderPage;
 
-import static me.rainstorm.innodb.parser.ParserConstants.verbose;
+import static me.rainstorm.innodb.common.i18n.I18nMsgCodeEnum.LogPageTypeDetailNotSupport;
+import static me.rainstorm.innodb.common.i18n.I18nUtil.message;
+import static me.rainstorm.innodb.parser.ParserConstants.VERBOSE;
 
 /**
  * @author traceless
@@ -20,8 +22,8 @@ public class LogicPageFactory {
             case FileSpaceHeader:
                 return new FileSpaceHeaderPage(physicalPage);
             default:
-                if (verbose && log.isDebugEnabled()) {
-                    log.debug("当前页类型 [{}] 详细解析暂不支持", pageType);
+                if (VERBOSE && log.isDebugEnabled()) {
+                    log.debug(message(LogPageTypeDetailNotSupport, pageType));
                 }
                 return new SimplePage(physicalPage);
         }

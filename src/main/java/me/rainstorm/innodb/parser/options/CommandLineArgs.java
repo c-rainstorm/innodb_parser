@@ -1,6 +1,7 @@
 package me.rainstorm.innodb.parser.options;
 
 import lombok.extern.slf4j.Slf4j;
+import me.rainstorm.innodb.common.i18n.SupportedLocaleEnum;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.ParseException;
@@ -9,9 +10,11 @@ import org.apache.commons.lang3.StringUtils;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import static me.rainstorm.innodb.common.i18n.I18nMsgCodeEnum.*;
+import static me.rainstorm.innodb.common.i18n.I18nUtil.message;
 import static me.rainstorm.innodb.domain.InnodbConstants.MYSQL_INNODB_VERSION;
 import static me.rainstorm.innodb.parser.ParserConstants.INNODB_PARSER_VERSION;
-import static me.rainstorm.innodb.parser.ParserConstants.verbose;
+import static me.rainstorm.innodb.parser.ParserConstants.VERBOSE;
 import static me.rainstorm.innodb.parser.options.CommandLineOptionEnum.*;
 
 /**
@@ -51,8 +54,8 @@ public class CommandLineArgs {
         String systemTableSpaceFileName = commandLineParsed.getOptionValue(SystemTableSpace.getOpt(), SystemTableSpace.getDefaultValue());
         Path systemTableSpace = Paths.get(dataDir, systemTableSpaceFileName);
 
-        if (verbose && log.isDebugEnabled()) {
-            log.debug("已解析的系统表空间文件名：{}, 绝对路径：{} ", systemTableSpaceFileName, systemTableSpace);
+        if (VERBOSE && log.isDebugEnabled()) {
+            log.debug(message(LogSystemTableSpacePath, systemTableSpaceFileName, systemTableSpace));
         }
         return systemTableSpace;
     }
@@ -60,8 +63,8 @@ public class CommandLineArgs {
     public Path filePerTableTableSpace() {
         Path tableSpacePath = Paths.get(dataDir(), database(), table() + ".ibd");
 
-        if (verbose && log.isDebugEnabled()) {
-            log.debug("已解析的独立表空间绝对路径：{} ", tableSpacePath);
+        if (VERBOSE && log.isDebugEnabled()) {
+            log.debug(message(LogIndependentTableSpacePath, tableSpacePath));
         }
         return tableSpacePath;
     }
@@ -76,5 +79,15 @@ public class CommandLineArgs {
 
     public String table() {
         return StringUtils.trimToEmpty(commandLineParsed.getOptionValue(Table.getOpt()));
+    }
+
+    public SupportedLocaleEnum locale() {
+        String locale = StringUtils.trimToEmpty(commandLineParsed.getOptionValue(I18N.getOpt())).toUpperCase();
+        try {
+            return SupportedLocaleEnum.valueOf(locale);
+        } catch (Exception e) {
+            System.err.println(message(LogLocaleNotSupport, locale, SupportedLocaleEnum.EN_US));
+            return SupportedLocaleEnum.EN_US;
+        }
     }
 }

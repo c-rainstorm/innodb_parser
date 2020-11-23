@@ -1,12 +1,17 @@
 package me.rainstorm.innodb.parser;
 
 import lombok.extern.slf4j.Slf4j;
+import me.rainstorm.innodb.common.i18n.I18nUtil;
 import me.rainstorm.innodb.parser.options.CommandLineArgs;
 import me.rainstorm.innodb.parser.strategy.cles.CommandLineExecuteStrategy;
 
 import java.util.Optional;
 
-import static me.rainstorm.innodb.parser.ParserConstants.verbose;
+import static me.rainstorm.innodb.common.i18n.I18nMsgCodeEnum.LogCommandLineExecuteStrategyDisMatched;
+import static me.rainstorm.innodb.common.i18n.I18nMsgCodeEnum.LogCommandLineExecuteStrategyMatched;
+import static me.rainstorm.innodb.common.i18n.I18nUtil.message;
+import static me.rainstorm.innodb.parser.ParserConstants.VERBOSE;
+import static me.rainstorm.innodb.parser.options.CommandLineOptionEnum.I18N;
 import static me.rainstorm.innodb.parser.options.CommandLineOptionEnum.Verbose;
 
 /**
@@ -30,8 +35,14 @@ public class Bootstrap {
     }
 
     public static void setGlobalConstants(CommandLineArgs commandLineArgs) {
+        // multi junit test case can run in same jvm, so we need reset first.
+        ParserConstants.reset();
+
         if (commandLineArgs.contains(Verbose)) {
-            ParserConstants.verbose = true;
+            ParserConstants.VERBOSE = true;
+        }
+        if (commandLineArgs.contains(I18N)) {
+            I18nUtil.setLocale(commandLineArgs.locale().getLocale());
         }
     }
 
@@ -41,13 +52,13 @@ public class Bootstrap {
         if (executeStrategyOpt.isPresent()) {
             executeStrategy = executeStrategyOpt.get();
 
-            if (verbose && log.isDebugEnabled()) {
-                log.debug("已匹配的执行策略：{}", executeStrategy.getClass().getSimpleName());
+            if (VERBOSE && log.isDebugEnabled()) {
+                log.debug(message(LogCommandLineExecuteStrategyMatched, executeStrategy.getClass().getSimpleName()));
             }
         } else {
             executeStrategy = CommandLineExecuteStrategy.defaultStrategy();
-            if (verbose && log.isDebugEnabled()) {
-                log.debug("执行策略匹配失败，执行默认策略：{}", executeStrategy.getClass().getSimpleName());
+            if (VERBOSE && log.isDebugEnabled()) {
+                log.debug(message(LogCommandLineExecuteStrategyDisMatched, executeStrategy.getClass().getSimpleName()));
             }
         }
 

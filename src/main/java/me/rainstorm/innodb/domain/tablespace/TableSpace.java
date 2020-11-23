@@ -16,10 +16,12 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import java.util.Iterator;
 
+import static me.rainstorm.innodb.common.i18n.I18nMsgCodeEnum.*;
+import static me.rainstorm.innodb.common.i18n.I18nUtil.message;
 import static me.rainstorm.innodb.domain.InnodbConstants.*;
 import static me.rainstorm.innodb.domain.extend.Extend.pageOffsetOfExtend;
 import static me.rainstorm.innodb.parser.ParserConstants.EXTEND_LRU_CACHE_SIZE;
-import static me.rainstorm.innodb.parser.ParserConstants.verbose;
+import static me.rainstorm.innodb.parser.ParserConstants.VERBOSE;
 
 /**
  * @author traceless
@@ -65,8 +67,8 @@ public abstract class TableSpace implements AutoCloseable {
     public <Page extends LogicPage<? extends PageBody>> Page page(int pageNo) {
         int extendOffset = extendOffsetOfTableSpace(pageNo);
         int pageOffsetInExtend = pageOffsetOfExtend(pageNo);
-        if (verbose && log.isDebugEnabled()) {
-            log.info("pageNo {} 区号 {}，区内偏移量 {}", pageNo, extendOffset, pageOffsetInExtend);
+        if (VERBOSE && log.isDebugEnabled()) {
+            log.debug(message(LogPageLocate, pageNo, extendOffset, pageOffsetInExtend));
         }
 
         Extend extend = extendLRUCache.computeIfAbsent(extendOffset, this::extend);
@@ -80,11 +82,11 @@ public abstract class TableSpace implements AutoCloseable {
             ByteBuffer byteBuffer = ByteBuffer.allocate(EXTEND_SIZE);
             int bytesRead = tableSpaceChannel.read(byteBuffer);
             if (bytesRead < EXTEND_SIZE && log.isDebugEnabled()) {
-                log.warn("加载 TableSpace {} 的 {} 号 Extend 读取数据不足，期待读取 {} 页, 实际读取 {} 页", tableSpacePath, extendOffset, PAGE_NUM_IN_EXTEND, bytesRead / PAGE_SIZE);
+                log.debug(message(LogPageNumInExtendLessThanExpected, tableSpacePath, extendOffset, PAGE_NUM_IN_EXTEND, bytesRead / PAGE_SIZE));
             }
             return new Extend(this, extendOffset, byteBuffer);
         } catch (IOException e) {
-            System.err.printf("加载 TableSpace %s 的 %s 号 Extend 失败\n", tableSpacePath, extendOffset);
+            System.err.println(message(LogLoadExtendFailure, tableSpacePath, extendOffset));
             System.exit(-1);
             return null;
         }
