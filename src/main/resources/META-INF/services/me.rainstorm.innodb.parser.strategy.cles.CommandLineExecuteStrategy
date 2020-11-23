@@ -1,0 +1,4 @@
+me.rainstorm.innodb.parser.strategy.cles.level_1.HelpStrategy
+me.rainstorm.innodb.parser.strategy.cles.level_1.VersionStrategy
+me.rainstorm.innodb.parser.strategy.cles.level_2.SystemTableSpaceAllPage
+me.rainstorm.innodb.parser.strategy.cles.level_2.FilePerTableTableSpacePages
