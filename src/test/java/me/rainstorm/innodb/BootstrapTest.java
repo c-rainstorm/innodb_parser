@@ -1,4 +1,4 @@
-package me.rainstorm.innodb.parser;
+package me.rainstorm.innodb;
 
 import me.rainstorm.innodb.parser.options.CommandLineArgs;
 import me.rainstorm.innodb.parser.options.CommandLineOptionEnum;
@@ -13,24 +13,31 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class BootstrapTest {
+import static me.rainstorm.innodb.Bootstrap.findExecuteStrategy;
+import static me.rainstorm.innodb.Bootstrap.setGlobalConstants;
+
+public class BootstrapTest extends Junit5Test {
+    @Resource
+    private Bootstrap bootstrap;
+
     @Test
-    public void none() throws ParseException {
+    public void none() throws Exception {
         String[] args = new String[]{};
 
         strategyAssert(args, HelpStrategy.class);
 
-        Bootstrap.main(args);
+        bootstrap.run(args);
     }
 
     @ParameterizedTest
     @CsvSource({"EN_US", "ZH_CN", "xxxx"})
-    public void help(String locale) throws ParseException {
+    public void help(String locale) throws Exception {
         String[] args = new String[]{
                 CommandLineOptionEnum.Help.getShortOpt(),
                 CommandLineOptionEnum.I18N.getShortOpt() + "=" + locale
@@ -38,21 +45,21 @@ public class BootstrapTest {
 
         strategyAssert(args, HelpStrategy.class);
 
-        Bootstrap.main(args);
+        bootstrap.run(args);
     }
 
     @Test
-    public void version() throws ParseException {
+    public void version() throws Exception {
         String[] args = new String[]{CommandLineOptionEnum.Version.getShortOpt()};
 
         strategyAssert(args, VersionStrategy.class);
 
-        Bootstrap.main(args);
+        bootstrap.run(args);
     }
 
     @ParameterizedTest
     @CsvSource("/tmp/mysql/")
-    public void systemSpaceAllPage(String dataDir) throws ParseException {
+    public void systemSpaceAllPage(String dataDir) throws Exception {
         List<String> argsList = new ArrayList<>();
 
         argsList.add(CommandLineOptionEnum.DataDir.getShortOpt() + "=" + dataDir);
@@ -63,7 +70,7 @@ public class BootstrapTest {
 
         strategyAssert(args, SystemTableSpaceAllPage.class);
 
-        Bootstrap.main(args);
+        bootstrap.run(args);
     }
 
     @ParameterizedTest
@@ -71,7 +78,7 @@ public class BootstrapTest {
             "true,EN_US,/tmp/mysql/,sparrow,test",
             "false,ZH_CN,/tmp/mysql/,sparrow,test",
             "false,EN_US,/tmp/mysql/,sparrow,test"})
-    public void FilePerTableTableSpacePages(boolean verbose, String locale, String dataDir, String database, String table) throws ParseException {
+    public void FilePerTableTableSpacePages(boolean verbose, String locale, String dataDir, String database, String table) throws Exception {
         String[] args = new String[]{
                 CommandLineOptionEnum.DataDir.getShortOpt() + "=" + dataDir,
                 CommandLineOptionEnum.Database.getShortOpt() + "=" + database,
@@ -85,7 +92,7 @@ public class BootstrapTest {
 
         strategyAssert(args, FilePerTableTableSpacePages.class);
 
-        Bootstrap.main(args);
+        bootstrap.run(args);
     }
 
     private String[] addArg(String[] args, String shortOpt) {
@@ -94,8 +101,8 @@ public class BootstrapTest {
 
     private void strategyAssert(String[] args, Class<? extends CommandLineExecuteStrategy> expectedStrategyClass) throws ParseException {
         CommandLineArgs commandLineArgs = new CommandLineArgs(args);
-        Bootstrap.setGlobalConstants(commandLineArgs);
-        CommandLineExecuteStrategy strategy = Bootstrap.findExecuteStrategy(commandLineArgs);
+        setGlobalConstants(commandLineArgs);
+        CommandLineExecuteStrategy strategy = findExecuteStrategy(commandLineArgs);
         Assertions.assertEquals(expectedStrategyClass, strategy.getClass());
     }
 }

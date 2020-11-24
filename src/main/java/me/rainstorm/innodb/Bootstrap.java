@@ -1,9 +1,13 @@
-package me.rainstorm.innodb.parser;
+package me.rainstorm.innodb;
 
 import lombok.extern.slf4j.Slf4j;
 import me.rainstorm.innodb.common.i18n.I18nUtil;
+import me.rainstorm.innodb.parser.ParserConstants;
 import me.rainstorm.innodb.parser.options.CommandLineArgs;
 import me.rainstorm.innodb.parser.strategy.cles.CommandLineExecuteStrategy;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
@@ -17,9 +21,12 @@ import static me.rainstorm.innodb.parser.options.CommandLineOptionEnum.Verbose;
 /**
  * @author traceless
  */
+@Profile("!test")
 @Slf4j
-public class Bootstrap {
-    public static void main(String[] args) {
+@Component
+public class Bootstrap implements CommandLineRunner {
+    @Override
+    public void run(String... args) throws Exception {
         try {
             CommandLineArgs commandLineArgs = new CommandLineArgs(args);
 
