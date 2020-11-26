@@ -1,11 +1,11 @@
 #!/bin/bash
 
-source iprc
+source iprc.sh
 source tools.sh
 
-ensureImageExist "${IMAGE}"
+ensureImageExist "${MYSQL_IMAGE}"
 
-mkdir -p "${MOUNT_VOLUME}"
+mkdir -p "${MYSQL_MOUNT_VOLUME}"
 mkdir -p "${PASSWORD_DIR}"
 
 echo "######################################################"
@@ -19,19 +19,19 @@ else
 fi
 echo "######################################################"
 
-stopContainer "${CONTAINER_NAME}"
+stopContainer "${MYSQL_CONTAINER_NAME}"
 
-docker run --name "${CONTAINER_NAME}" -p 3306:3306 \
-    -v "${MY_CONF_DIR}":/etc/mysql/conf.d \
-    -v "${MOUNT_VOLUME}":/var/lib/mysql \
-    -v "${INIT_DB_DIR}":/docker-entrypoint-initdb.d \
+docker run --name "${MYSQL_CONTAINER_NAME}" -p 3306:3306 \
+    -v "${MYSQL_MY_CONF_DIR}":/etc/mysql/conf.d \
+    -v "${MYSQL_MOUNT_VOLUME}":/var/lib/mysql \
+    -v "${MYSQL_INIT_DB_DIR}":/docker-entrypoint-initdb.d \
     -e MYSQL_ROOT_PASSWORD="$(cat "${MYSQL_PASS_FILE}")" \
-    -d "${IMAGE}"
+    -d "${MYSQL_IMAGE}"
 
 echo "#######################DB 配置#######################"
-cat "${MY_CONF_DIR}"/*
+cat "${MYSQL_MY_CONF_DIR}"/*
 echo "#######################DB 配置#######################"
 
 echo "#######################DB 初始化#######################"
-cat "${INIT_DB_DIR}"/*
+cat "${MYSQL_INIT_DB_DIR}"/*
 echo "#######################DB 初始化#######################"

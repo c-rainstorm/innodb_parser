@@ -1,4 +1,4 @@
-package me.rainstorm.innodb.domain.extend;
+package me.rainstorm.innodb.domain.extent;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -14,37 +14,37 @@ import static me.rainstorm.innodb.domain.InnodbConstants.PAGE_NUM_IN_EXTEND;
 import static me.rainstorm.innodb.domain.InnodbConstants.PAGE_SIZE;
 
 /**
- * An Extend in TableSpace
+ * An Extent in TableSpace
  *
  * @author traceless
  */
 @Slf4j
 @Getter
-public class Extend {
+public class Extent {
     private final TableSpace tableSpace;
-    private final int extendOffset;
+    private final int extentOffset;
     private final ByteBuffer data;
 
-    public Extend(TableSpace tableSpace, int extendOffset, ByteBuffer data) {
+    public Extent(TableSpace tableSpace, int extendOffset, ByteBuffer data) {
         this.tableSpace = tableSpace;
-        this.extendOffset = extendOffset;
+        this.extentOffset = extendOffset;
         this.data = data;
     }
 
     /**
-     * load nth Page in this Extend
+     * load nth Page in this Extent
      *
-     * @param pageOffsetInExtend n
+     * @param pageOffsetInExtent n
      * @param <Page>             the Page
      * @return the Page
      */
-    public <Page extends LogicPage<? extends PageBody>> Page page(int pageOffsetInExtend) {
-        PhysicalPage physicalPage = new PhysicalPage(this, pageOffsetInExtend,
-                ByteBuffer.wrap(data.array(), pageOffsetInExtend * PAGE_SIZE, PAGE_SIZE).asReadOnlyBuffer());
+    public <Page extends LogicPage<? extends PageBody>> Page page(int pageOffsetInExtent) {
+        PhysicalPage physicalPage = new PhysicalPage(this, pageOffsetInExtent,
+                ByteBuffer.wrap(data.array(), pageOffsetInExtent * PAGE_SIZE, PAGE_SIZE).asReadOnlyBuffer());
         return (Page) LogicPageFactory.of(physicalPage);
     }
 
-    public static int pageOffsetOfExtend(int pageNo) {
+    public static int pageOffsetOfExtent(int pageNo) {
         return pageNo % PAGE_NUM_IN_EXTEND;
     }
 }

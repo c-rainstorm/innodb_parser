@@ -1,7 +1,0 @@
-CONTAINER_NAME=mysql
-MOUNT_VOLUME=/tmp/mysql
-IMAGE=mysql:5.7
-MY_CONF_DIR=$(pwd)/conf.d
-INIT_DB_DIR=$(pwd)/docker-entrypoint-initdb.d
-PASSWORD_DIR=~/.password
-MYSQL_PASS_FILE=${PASSWORD_DIR}/mysql

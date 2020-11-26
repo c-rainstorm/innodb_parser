@@ -29,7 +29,8 @@ public enum CommandLineOptionEnum {
 
     Database(true, 'd', "database", true, OptionDatabase),
     Table(true, 't', "table", true, OptionTable),
-    Page(true, 'p', "page", true, OptionPage);
+    Page(true, 'p', "page", true, OptionPage),
+    Export(true, 'e', "export", false, OptionExport);
 
     private final boolean controlOpt;
     private final char opt;

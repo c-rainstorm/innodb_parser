@@ -37,7 +37,7 @@ public class SystemTableSpaceAllPage extends CommandLineExecuteStrategy {
         Iterator<LogicPage<?>> iterator = systemTableSpace.sequentialTraversalIterator();
         if (VERBOSE && log.isDebugEnabled()) {
             log.debug(message(LogTableSpaceSummary, systemTableSpace,
-                    systemTableSpace.totalExtendNumber(),
+                    systemTableSpace.totalExtentNumber(),
                     systemTableSpace.totalPageNumber()));
         }
 

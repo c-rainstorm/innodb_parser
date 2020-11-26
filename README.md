@@ -7,120 +7,49 @@ Innodb 数据页解析工具
 ### 所需依赖
 
 - Docker for Desktop
+- Neo4j Desktop
 - JRE 1.8
-- Maven
 
-### 快速构建 innodb-parser
+### 默认配置
 
-```bash
-git clone git@github.com:c-rainstorm/innodb_parser.git && cd innodb-parser
-
-chmod +x run-mysql-in-docker.sh
-
-// 需要本地安装 Docker for Desktop
-// 依赖镜像 mysql:5.7
-//
-// 创建用户 traceless
-// 创建数据库 sparrow
-// 创建表 test
-./run-mysql-in-docker.sh
-
-// 会打包成 fat jar，可以直接执行
-mvn clean package 
-
-// 建议保存到 shell 配置文件里
-alias innodb_parser="java -jar $(pwd)/target/innodb-parser-*.jar"
-
-innodb_parser -h
-```
-
-### Usage
-
-```bash
-$ innodb_parser -h
-
-usage: java -jar /path/to/your/innodb-parser.jar  [OPTION]...
-
-Analyze InnoDB data files according to the options.
-For the complete DEMO operation, please refer to README.
-------------------------------------------------------------------------------------------------------------------------
- -d,--database <arg>                 The name of the database to be analyzed
- -h,--help                           Print help document
- -l,--locale <arg>                   International support，At present, only Chinese[zh_CN] and English[en_US] are
-                                     supported
- -p,--page <arg>                     The table space page number to be analyzed, starting from 0
- -r,--root-dir-of-data <arg>         Data directory. All table spaces are in this directory by default, default
-                                     /var/lib/mysql
- -s,--system-tablespace-file <arg>   System table space file path, relative path of Option -r, default ibdata1
- -t,--table <arg>                    Table name to be analyzed
- -V,--verbose                        Print more detailed information
- -v,--version                        Print version number
-------------------------------------------------------------------------------------------------------------------------
-If you have any questions, please contact Developers in pom.xml.
+`iprc.sh`
 
 ```
+PASSWORD_DIR=~/.password
 
-### 操作指北
+# MySQL 配置
+MYSQL_CONTAINER_NAME=mysql
+MYSQL_MOUNT_VOLUME=/tmp/mysql
+MYSQL_IMAGE=mysql:5.7
+MYSQL_MY_CONF_DIR=$(pwd)/conf.d
+MYSQL_INIT_DB_DIR=$(pwd)/docker-entrypoint-initdb.d
+MYSQL_PASS_FILE=${PASSWORD_DIR}/mysql
 
-#### 国际化支持
-
-```bash
-$ innodb_parser -h
-
-usage: java -jar /path/to/your/innodb-parser.jar  [OPTION]...
-
-Analyze InnoDB data files according to the options.
-For the complete DEMO operation, please refer to README.
-------------------------------------------------------------------------------------------------------------------------
- -d,--database <arg>                 The name of the database to be analyzed
- -h,--help                           Print help document
- -l,--locale <arg>                   International support，At present, only Chinese[zh_CN] and English[en_US] are
-                                     supported
- -p,--page <arg>                     The table space page number to be analyzed, starting from 0
- -r,--root-dir-of-data <arg>         Data directory. All table spaces are in this directory by default, default
-                                     /var/lib/mysql
- -s,--system-tablespace-file <arg>   System table space file path, relative path of Option -r, default ibdata1
- -t,--table <arg>                    Table name to be analyzed
- -V,--verbose                        Print more detailed information
- -v,--version                        Print version number
-------------------------------------------------------------------------------------------------------------------------
-If you have any questions, please contact Developers in pom.xml.
-
-$ innodb_parser -h -l=zh_CN
-
-usage: java -jar /path/to/your/innodb-parser.jar  [OPTION]...
-
-根据选项解析 Innodb 数据文件，具体操作完整 DEMO 请查看 README
-------------------------------------------------------------------------------------------------------------------------
- -d,--database <arg>                 需要分析的数据库名称
- -h,--help                           打印帮助文档
- -l,--locale <arg>                   国际化支持，目前仅支持 中文[zh_CN], 英文[en_US] 两种
- -p,--page <arg>                     需要分析的表空间页号，页号从 0 开始
- -r,--root-dir-of-data <arg>         数据目录，所有表空间默认在该目录下, 默认值 /var/lib/mysql
- -s,--system-tablespace-file <arg>   系统表空间文件路径，-r 的相对路径, 默认值 ibdata1
- -t,--table <arg>                    需要分析的表名
- -V,--verbose                        打印更详细的信息
- -v,--version                        打印版本号
-------------------------------------------------------------------------------------------------------------------------
-如有问题，可以联系 pom.xml 中的开发者
+# Neo4j 配置
+NEO4J_URL=bolt://localhost:7687
+NEO4J_USER=neo4j
+NEO4J_PASSWORD=innodb
 ```
 
-#### 独立表空间页结构分析
+### Step 1: 创建并启动本地 Neo4j 数据库
 
-```bash
+使用 Neo4j Desktop 创建一个 Neo4j 数据库，密码为 innodb，并启动
 
-$ innodb_parser -r=/tmp/mysql -d=sparrow -t=test
+![](http://image.rainstorm.vip/mysql/parser/create-database-preview-1.png)
 
-[    PageNo][   SpaceID]Page <PageType> ...
--------------------------------------------
-[         0][        23]Page <File space header> 
-[         1][        23]Page <Insert buffer bitmap> 
-[         2][        23]Page <Segment info> 
-[         3][        23]Page <B-tree node> 
-[         4][        23]Page <B-tree node> 
-[          ][          ]Page <Freshly allocated>
-[          ][          ]Page <Freshly allocated>
-```
+### Step 2: 创建/重启 MySQL Docker 实例
+
+运行脚本 `./run-mysql-in-docker.sh`。 在 Docker Desktop 里创建一个实例数据库。
+
+### Step 3: 解析表空间结构到 Neo4j 数据库
+
+运行 `./do-parse.sh`。 打包项目为 jar，解析并导出 `./sparrow/test.ibd` 独立表空间到 Neo4j 数据库。
+
+### Step 4: 使用 Neo4j Bloom 预览
+
+![](http://image.rainstorm.vip/mysql/parser/neo4j-bloom-preview-1.png)
+
+
 
 ### Tips
 

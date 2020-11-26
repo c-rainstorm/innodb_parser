@@ -50,7 +50,7 @@ public enum PageTypeEnum {
     /**
      * Extent descriptor page
      */
-    ExtendDescriptor(9, "FIL_PAGE_TYPE_XDES", TermPageTypeExtendDescriptor),
+    ExtentDescriptor(9, "FIL_PAGE_TYPE_XDES", TermPageTypeExtentDescriptor),
     /**
      * Uncompressed BLOB page
      */

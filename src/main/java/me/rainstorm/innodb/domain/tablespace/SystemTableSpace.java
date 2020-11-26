@@ -7,7 +7,7 @@ import java.nio.file.Path;
  */
 public class SystemTableSpace extends TableSpace {
     public SystemTableSpace(Path tableSpacePath) {
-        super(tableSpacePath);
+        super(tableSpacePath, tableSpacePath);
     }
 
 

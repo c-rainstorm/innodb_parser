@@ -1,12 +1,13 @@
 package me.rainstorm.innodb.domain.tablespace;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import me.rainstorm.innodb.common.LRUCache;
 import me.rainstorm.innodb.domain.InnodbConstants;
-import me.rainstorm.innodb.domain.extend.Extend;
+import me.rainstorm.innodb.domain.extent.Extent;
 import me.rainstorm.innodb.domain.page.LogicPage;
 import me.rainstorm.innodb.domain.page.core.PageBody;
-import me.rainstorm.innodb.domain.page.xdes.fsp.FileSpaceHeaderPage;
+import me.rainstorm.innodb.domain.page.fsp.FileSpaceHeaderPage;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -19,7 +20,7 @@ import java.util.Iterator;
 import static me.rainstorm.innodb.common.i18n.I18nMsgCodeEnum.*;
 import static me.rainstorm.innodb.common.i18n.I18nUtil.message;
 import static me.rainstorm.innodb.domain.InnodbConstants.*;
-import static me.rainstorm.innodb.domain.extend.Extend.pageOffsetOfExtend;
+import static me.rainstorm.innodb.domain.extent.Extent.pageOffsetOfExtent;
 import static me.rainstorm.innodb.parser.ParserConstants.EXTEND_LRU_CACHE_SIZE;
 import static me.rainstorm.innodb.parser.ParserConstants.VERBOSE;
 
@@ -32,17 +33,20 @@ public abstract class TableSpace implements AutoCloseable {
 
     private final FileChannel tableSpaceChannel;
     private final Path tableSpacePath;
+    private final Path relativePath;
     /**
-     * 每个 Extend 正常情况下 1M，LRU 非线程安全
+     * 每个 Extent 正常情况下 1M，LRU 非线程安全
      *
      * @see InnodbConstants#PAGE_NUM_IN_EXTEND
      */
-    private final LRUCache<Integer, Extend> extendLRUCache;
+    private final LRUCache<Integer, Extent> extendLRUCache;
 
+    @Getter
     protected FileSpaceHeaderPage fileSpaceHeaderPage;
 
-    public TableSpace(Path tableSpacePath) {
+    public TableSpace(Path tableSpacePath, Path relativePath) {
         this.tableSpacePath = tableSpacePath;
+        this.relativePath = relativePath;
         extendLRUCache = new LRUCache<>(EXTEND_LRU_CACHE_SIZE);
         RandomAccessFile reader;
         try {
@@ -66,27 +70,27 @@ public abstract class TableSpace implements AutoCloseable {
 
     public <Page extends LogicPage<? extends PageBody>> Page page(int pageNo) {
         int extendOffset = extendOffsetOfTableSpace(pageNo);
-        int pageOffsetInExtend = pageOffsetOfExtend(pageNo);
+        int pageOffsetInExtent = pageOffsetOfExtent(pageNo);
         if (VERBOSE && log.isDebugEnabled()) {
-            log.debug(message(LogPageLocate, pageNo, extendOffset, pageOffsetInExtend));
+            log.debug(message(LogPageLocate, pageNo, extendOffset, pageOffsetInExtent));
         }
 
-        Extend extend = extendLRUCache.computeIfAbsent(extendOffset, this::extend);
-        return extend.page(pageOffsetInExtend);
+        Extent extent = extendLRUCache.computeIfAbsent(extendOffset, this::extend);
+        return extent.page(pageOffsetInExtent);
     }
 
-    public Extend extend(int extendOffset) {
+    public Extent extend(int extendOffset) {
         try {
             tableSpaceChannel.position(extendOffset * EXTEND_SIZE);
 
             ByteBuffer byteBuffer = ByteBuffer.allocate(EXTEND_SIZE);
             int bytesRead = tableSpaceChannel.read(byteBuffer);
             if (bytesRead < EXTEND_SIZE && log.isDebugEnabled()) {
-                log.debug(message(LogPageNumInExtendLessThanExpected, tableSpacePath, extendOffset, PAGE_NUM_IN_EXTEND, bytesRead / PAGE_SIZE));
+                log.debug(message(LogPageNumInExtentLessThanExpected, tableSpacePath, extendOffset, PAGE_NUM_IN_EXTEND, bytesRead / PAGE_SIZE));
             }
-            return new Extend(this, extendOffset, byteBuffer);
+            return new Extent(this, extendOffset, byteBuffer);
         } catch (IOException e) {
-            System.err.println(message(LogLoadExtendFailure, tableSpacePath, extendOffset));
+            System.err.println(message(LogLoadExtentFailure, tableSpacePath, extendOffset));
             System.exit(-1);
             return null;
         }
@@ -113,12 +117,16 @@ public abstract class TableSpace implements AutoCloseable {
         return fileSpaceHeaderPage.totalPageNumber();
     }
 
-    public int totalExtendNumber() {
+    public int totalExtentNumber() {
         return extendOffsetOfTableSpace(totalPageNumber()) + 1;
     }
 
     public Iterator<LogicPage<?>> sequentialTraversalIterator() {
         return new SequentialTraversalIterator(fileSpaceHeaderPage.totalPageNumber());
+    }
+
+    public String relativePath() {
+        return relativePath.toString();
     }
 
     class SequentialTraversalIterator implements Iterator<LogicPage<?>> {

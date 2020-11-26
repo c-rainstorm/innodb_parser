@@ -18,6 +18,7 @@ public enum I18nMsgCodeEnum {
     OptionDatabase,
     OptionTable,
     OptionPage,
+    OptionExport,
 
     //-----------------------LOG--------------------------------
     LogSystemTableSpacePath,
@@ -27,8 +28,8 @@ public enum I18nMsgCodeEnum {
     LogCommandLineExecuteStrategyMatched,
     LogCommandLineExecuteStrategyDisMatched,
     LogPageLocate,
-    LogPageNumInExtendLessThanExpected,
-    LogLoadExtendFailure,
+    LogPageNumInExtentLessThanExpected,
+    LogLoadExtentFailure,
     LogTableSpaceSummary,
     LogLocaleNotSupport,
     //--------------------Term begin----------------------------
@@ -42,7 +43,7 @@ public enum I18nMsgCodeEnum {
     TermPageTypeSystem,
     TermPageTypeTransactionSystem,
     TermPageTypeFileSpaceHeader,
-    TermPageTypeExtendDescriptor,
+    TermPageTypeExtentDescriptor,
     TermPageTypeBlob,
     TermPageTypeZBlob,
     TermPageTypeZBlob2,

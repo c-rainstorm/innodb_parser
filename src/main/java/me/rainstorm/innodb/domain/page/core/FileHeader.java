@@ -1,7 +1,7 @@
 package me.rainstorm.innodb.domain.page.core;
 
 import lombok.Getter;
-import me.rainstorm.innodb.domain.extend.Extend;
+import me.rainstorm.innodb.domain.extent.Extent;
 import me.rainstorm.innodb.domain.page.PageTypeEnum;
 import me.rainstorm.innodb.domain.page.PhysicalPage;
 import me.rainstorm.innodb.domain.tablespace.SystemTableSpace;
@@ -21,7 +21,7 @@ public class FileHeader {
     public static final int PAGE_TYPE_OFFSET = 24;
 
     private final TableSpace tableSpace;
-    private final Extend extend;
+    private final Extent extent;
 
     /**
      * 页面校验和
@@ -59,8 +59,8 @@ public class FileHeader {
     private final int tableSpaceId;
 
     public FileHeader(PhysicalPage page) {
-        this.extend = page.getExtend();
-        this.tableSpace = extend.getTableSpace();
+        this.extent = page.getExtent();
+        this.tableSpace = extent.getTableSpace();
 
         ByteBuffer buffer = page.getData(OFFSET);
 
