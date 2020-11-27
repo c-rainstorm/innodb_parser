@@ -39,12 +39,12 @@ public class InnodbConstants {
      * <p>
      * (4194304/UNIV_PAGE_SIZE))))
      */
-    public static int PAGE_NUM_IN_EXTEND =
+    public static int PAGE_NUM_IN_EXTENT =
             PAGE_SIZE <= 16 * ONE_K ?
                     ONE_M / PAGE_SIZE :
                     PAGE_SIZE <= 32 * ONE_K ?
                             2 * ONE_M / PAGE_SIZE :
                             4 * ONE_M / PAGE_SIZE;
 
-    public static int EXTEND_SIZE = PAGE_SIZE * PAGE_NUM_IN_EXTEND;
+    public static int EXTEND_SIZE = PAGE_SIZE * PAGE_NUM_IN_EXTENT;
 }

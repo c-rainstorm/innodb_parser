@@ -10,6 +10,8 @@ import me.rainstorm.innodb.domain.page.core.list.ListNode;
 import me.rainstorm.innodb.domain.page.fsp.FileSpaceHeader;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
+import java.util.stream.Stream;
 
 /**
  * @author traceless
@@ -46,4 +48,12 @@ public class InodePageBody extends PageBody {
         return inodeListNode.getNextInodePageNumber() != -1;
     }
 
+    /**
+     * [1,getNextUnusedSegmentId)，之间的段号都有效
+     *
+     * @see FileSpaceHeader#getNextUnusedSegmentId()
+     */
+    public Stream<SegmentEntry> segments() {
+        return Arrays.stream(inodeEntries).filter(SegmentEntry::valid);
+    }
 }

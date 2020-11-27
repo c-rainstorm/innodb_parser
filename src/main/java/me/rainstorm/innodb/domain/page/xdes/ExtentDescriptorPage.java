@@ -13,6 +13,6 @@ public class ExtentDescriptorPage extends AbstractExtentDescriptorPage<Undefined
 
     @Override
     protected ExtentDescriptorPageBody<Undefined> createPageBody(PhysicalPage physicalPage) {
-        return null;
+        return new ExtentDescriptorPageBody<>(physicalPage, Undefined.INSTANCE);
     }
 }

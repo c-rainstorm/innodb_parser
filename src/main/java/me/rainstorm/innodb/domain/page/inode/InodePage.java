@@ -6,6 +6,8 @@ import me.rainstorm.innodb.domain.page.LogicPage;
 import me.rainstorm.innodb.domain.page.PhysicalPage;
 import org.neo4j.driver.Result;
 
+import java.util.stream.Stream;
+
 import static me.rainstorm.innodb.parser.ParserConstants.VERBOSE;
 import static org.neo4j.driver.Values.parameters;
 
@@ -26,6 +28,24 @@ public class InodePage extends LogicPage<InodePageBody> {
     @Override
     public void addNodes(Neo4jHelper neo4jHelper) {
         super.addNodes(neo4jHelper);
+        addNodeSegment(neo4jHelper);
+    }
+
+    private void addNodeSegment(Neo4jHelper neo4jHelper) {
+        neo4jHelper.execute(session -> session.writeTransaction(tx -> {
+            Stream<SegmentEntry> segmentEntryStream = body.segments();
+
+            segmentEntryStream.forEach(segmentEntry -> {
+                Result result = tx.run("MERGE (seg:Segment {segID: toInteger($segmentID)})\n" +
+                                " RETURN seg;",
+                        parameters("segmentID", segmentEntry.getSegmentId()));
+
+                if (VERBOSE && log.isDebugEnabled() && result.hasNext()) {
+                    log.debug("add Segment node of {} done.", segmentEntry.getSegmentId());
+                }
+            });
+            return null;
+        }));
     }
 
     @Override

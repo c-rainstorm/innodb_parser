@@ -6,12 +6,14 @@ import me.rainstorm.innodb.domain.page.LogicPage;
 import me.rainstorm.innodb.domain.page.LogicPageFactory;
 import me.rainstorm.innodb.domain.page.PhysicalPage;
 import me.rainstorm.innodb.domain.page.core.PageBody;
+import me.rainstorm.innodb.domain.page.xdes.AbstractExtentDescriptorPage;
 import me.rainstorm.innodb.domain.tablespace.TableSpace;
 
 import java.nio.ByteBuffer;
 
-import static me.rainstorm.innodb.domain.InnodbConstants.PAGE_NUM_IN_EXTEND;
+import static me.rainstorm.innodb.domain.InnodbConstants.PAGE_NUM_IN_EXTENT;
 import static me.rainstorm.innodb.domain.InnodbConstants.PAGE_SIZE;
+import static me.rainstorm.innodb.domain.page.xdes.AbstractExtentDescriptorPage.PAGE_NO_IN_EXTENT;
 
 /**
  * An Extent in TableSpace
@@ -22,13 +24,16 @@ import static me.rainstorm.innodb.domain.InnodbConstants.PAGE_SIZE;
 @Getter
 public class Extent {
     private final TableSpace tableSpace;
-    private final int extentOffset;
+    private final int extentNo;
     private final ByteBuffer data;
+
+    private final AbstractExtentDescriptorPage<?> extentDescriptorPage;
 
     public Extent(TableSpace tableSpace, int extendOffset, ByteBuffer data) {
         this.tableSpace = tableSpace;
-        this.extentOffset = extendOffset;
+        this.extentNo = extendOffset;
         this.data = data;
+        this.extentDescriptorPage = page(PAGE_NO_IN_EXTENT);
     }
 
     /**
@@ -45,6 +50,6 @@ public class Extent {
     }
 
     public static int pageOffsetOfExtent(int pageNo) {
-        return pageNo % PAGE_NUM_IN_EXTEND;
+        return pageNo % PAGE_NUM_IN_EXTENT;
     }
 }

@@ -50,4 +50,8 @@ public class SegmentEntry {
             fragmentPages[i] = buffer.getInt();
         }
     }
+
+    public boolean valid() {
+        return segmentId != 0;
+    }
 }

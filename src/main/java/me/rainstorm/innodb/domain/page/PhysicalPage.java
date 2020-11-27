@@ -7,7 +7,7 @@ import me.rainstorm.innodb.domain.page.core.FileHeader;
 
 import java.nio.ByteBuffer;
 
-import static me.rainstorm.innodb.domain.InnodbConstants.PAGE_NUM_IN_EXTEND;
+import static me.rainstorm.innodb.domain.InnodbConstants.PAGE_NUM_IN_EXTENT;
 
 /**
  * @author traceless
@@ -22,7 +22,7 @@ public class PhysicalPage {
 
     public PhysicalPage(Extent extent, int pageOffsetInExtent, ByteBuffer data) {
         assert data.isReadOnly();
-        this.pageNo = extent.getExtentOffset() * PAGE_NUM_IN_EXTEND + pageOffsetInExtent;
+        this.pageNo = extent.getExtentNo() * PAGE_NUM_IN_EXTENT + pageOffsetInExtent;
         this.extent = extent;
         this.pageOffsetInExtent = pageOffsetInExtent;
         this.data = data;

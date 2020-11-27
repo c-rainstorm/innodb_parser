@@ -37,7 +37,7 @@ public abstract class TableSpace implements AutoCloseable {
     /**
      * 每个 Extent 正常情况下 1M，LRU 非线程安全
      *
-     * @see InnodbConstants#PAGE_NUM_IN_EXTEND
+     * @see InnodbConstants#PAGE_NUM_IN_EXTENT
      */
     private final LRUCache<Integer, Extent> extendLRUCache;
 
@@ -86,7 +86,7 @@ public abstract class TableSpace implements AutoCloseable {
             ByteBuffer byteBuffer = ByteBuffer.allocate(EXTEND_SIZE);
             int bytesRead = tableSpaceChannel.read(byteBuffer);
             if (bytesRead < EXTEND_SIZE && log.isDebugEnabled()) {
-                log.debug(message(LogPageNumInExtentLessThanExpected, tableSpacePath, extendOffset, PAGE_NUM_IN_EXTEND, bytesRead / PAGE_SIZE));
+                log.debug(message(LogPageNumInExtentLessThanExpected, tableSpacePath, extendOffset, PAGE_NUM_IN_EXTENT, bytesRead / PAGE_SIZE));
             }
             return new Extent(this, extendOffset, byteBuffer);
         } catch (IOException e) {
@@ -110,7 +110,7 @@ public abstract class TableSpace implements AutoCloseable {
     }
 
     public static int extendOffsetOfTableSpace(int pageNo) {
-        return pageNo / PAGE_NUM_IN_EXTEND;
+        return pageNo / PAGE_NUM_IN_EXTENT;
     }
 
     public int totalPageNumber() {
