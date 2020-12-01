@@ -20,7 +20,7 @@ import java.util.stream.Stream;
 public class InodePageBody extends PageBody {
     private static final int OFFSET = FileHeader.OFFSET + FileHeader.LENGTH;
     private static final int INODE_ENTRY_PER_PAGE = (InnodbConstants.PAGE_SIZE - FileHeader.LENGTH - FileTrailer.LENGTH - ListNode.LENGTH) / SegmentEntry.LENGTH;
-
+    public static final int SEGMENT_ENTRY_ARRAY_OFFSET = OFFSET + ListNode.LENGTH;
     /**
      * Inode Page 间的链表，表空间内有两个INode Page 链表
      *

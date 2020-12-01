@@ -6,8 +6,10 @@ import me.rainstorm.innodb.domain.page.LogicPage;
 import me.rainstorm.innodb.domain.page.PhysicalPage;
 import org.neo4j.driver.Result;
 
+import java.util.Arrays;
 import java.util.stream.Stream;
 
+import static me.rainstorm.innodb.domain.page.inode.InodePageBody.SEGMENT_ENTRY_ARRAY_OFFSET;
 import static me.rainstorm.innodb.parser.ParserConstants.VERBOSE;
 import static org.neo4j.driver.Values.parameters;
 
@@ -23,6 +25,13 @@ public class InodePage extends LogicPage<InodePageBody> {
     @Override
     protected InodePageBody createPageBody(PhysicalPage physicalPage) {
         return new InodePageBody(physicalPage);
+    }
+
+
+    public SegmentEntry getSegmentEntry(short offset) {
+        int index = (offset - SEGMENT_ENTRY_ARRAY_OFFSET) / SegmentEntry.LENGTH;
+
+        return body.getInodeEntries()[index];
     }
 
     @Override
@@ -52,6 +61,8 @@ public class InodePage extends LogicPage<InodePageBody> {
     public void linkNodes(Neo4jHelper neo4jHelper) {
         super.linkNodes(neo4jHelper);
         linkBetweenInodes(neo4jHelper);
+        linkBetweenSegmentAndFragPage(neo4jHelper);
+        linkBetweenSegmentAndInode(neo4jHelper);
     }
 
     private void linkBetweenInodes(Neo4jHelper neo4jHelper) {
@@ -99,4 +110,38 @@ public class InodePage extends LogicPage<InodePageBody> {
         }));
     }
 
+    private void linkBetweenSegmentAndFragPage(Neo4jHelper neo4jHelper) {
+        Stream<SegmentEntry> segments = body.segments();
+        segments.forEach(segmentEntry ->
+                Arrays.stream(segmentEntry.getFragmentPages()).filter(x -> x > 0).forEach(pageNo ->
+                        neo4jHelper.execute(session -> session.writeTransaction(tx -> {
+                            tx.run("MATCH (s:Segment)\n" +
+                                            "WHERE s.segID = toInteger($SegmentID)\n" +
+                                            "MATCH (p:Page)\n" +
+                                            "WHERE p.pID = toInteger($PageNo)\n" +
+                                            "MERGE (s)-[r:contain]->(p)\n" +
+                                            "return r;",
+                                    parameters("SegmentID", segmentEntry.getSegmentId(),
+                                            "PageNo", pageNo));
+                            return null;
+                        }))));
+    }
+
+    private void linkBetweenSegmentAndInode(Neo4jHelper neo4jHelper) {
+        Stream<SegmentEntry> segments = body.segments();
+        segments.forEach(segmentEntry -> {
+
+            neo4jHelper.execute(session -> session.writeTransaction(tx -> {
+                tx.run("MATCH (s:Segment)\n" +
+                                "WHERE s.segID = toInteger($SegmentID)\n" +
+                                "MATCH (p:Page)\n" +
+                                "WHERE p.pID = toInteger($PageNo)\n" +
+                                "MERGE (p)-[r:describe]->(s)\n" +
+                                "return r;",
+                        parameters("SegmentID", segmentEntry.getSegmentId(),
+                                "PageNo", getPageNo()));
+                return null;
+            }));
+        });
+    }
 }

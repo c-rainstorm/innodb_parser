@@ -5,6 +5,7 @@ import me.rainstorm.innodb.domain.page.allocated.AllocatedPage;
 import me.rainstorm.innodb.domain.page.core.PageBody;
 import me.rainstorm.innodb.domain.page.core.SimplePage;
 import me.rainstorm.innodb.domain.page.fsp.FileSpaceHeaderPage;
+import me.rainstorm.innodb.domain.page.index.IndexPage;
 import me.rainstorm.innodb.domain.page.inode.InodePage;
 import me.rainstorm.innodb.domain.page.xdes.ExtentDescriptorPage;
 
@@ -28,6 +29,8 @@ public class LogicPageFactory {
                 return new ExtentDescriptorPage(physicalPage);
             case Inode:
                 return new InodePage(physicalPage);
+            case Index:
+                return new IndexPage(physicalPage);
             default:
                 if (VERBOSE && log.isDebugEnabled()) {
                     log.debug(message(LogPageTypeDetailNotSupport, pageType));
