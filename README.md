@@ -47,7 +47,7 @@ NEO4J_PASSWORD=innodb
 
 ### Step 4: 使用 Neo4j Bloom 预览
 
-![](http://image.rainstorm.vip/mysql/parser/neo4j-bloom-preview-1.png)
+![](http://image.rainstorm.vip/mysql/parser/neo4j-bloom-preview-2.png)
 
 
 
