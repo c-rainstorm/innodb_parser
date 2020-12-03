@@ -8,8 +8,6 @@ import org.neo4j.driver.Result;
 
 import java.util.Iterator;
 
-import static me.rainstorm.innodb.domain.InnodbConstants.PAGE_NUM_IN_EXTENT;
-import static me.rainstorm.innodb.domain.page.xdes.ExtentDescriptorPageBody.EXTENT_GROUP_SIZE;
 import static me.rainstorm.innodb.parser.ParserConstants.VERBOSE;
 import static org.neo4j.driver.Values.parameters;
 
@@ -24,9 +22,6 @@ public abstract class AbstractExtentDescriptorPage<T> extends LogicPage<ExtentDe
 
     public AbstractExtentDescriptorPage(PhysicalPage physicalPage) {
         super(physicalPage);
-        // 每 256 个区一个区描述符，且为该区第一个页面
-        assert extent().getExtentNo() == physicalPage.getPageNo() / PAGE_NUM_IN_EXTENT;
-        assert physicalPage.getPageNo() % EXTENT_GROUP_SIZE == 0;
     }
 
     @Override

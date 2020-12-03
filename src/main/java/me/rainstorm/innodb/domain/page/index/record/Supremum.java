@@ -1,25 +1,26 @@
 package me.rainstorm.innodb.domain.page.index.record;
 
 import me.rainstorm.innodb.domain.page.PhysicalPage;
-
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
+import me.rainstorm.innodb.domain.page.index.IndexPageBody;
 
 /**
+ * #define PAGE_OLD_SUPREMUM	(PAGE_DATA + 2 + 2 * REC_N_OLD_EXTRA_BYTES + 8)
+ * #define PAGE_OLD_SUPREMUM_END (PAGE_OLD_SUPREMUM + 9)
+ * <p>
+ * #define PAGE_NEW_SUPREMUM	(PAGE_DATA + 2 * REC_N_NEW_EXTRA_BYTES + 8)
+ * #define PAGE_NEW_SUPREMUM_END (PAGE_NEW_SUPREMUM + 8)
+ *
  * @author traceless
  */
-public class Supremum extends Record {
-    public static final int OFFSET = Infimum.OFFSET + Infimum.LENGTH;
-    public static final int LENGTH = RecordHeader.LENGTH + 8;
+public class Supremum extends SpecialRecord {
 
-    private final String desc;
+    public Supremum(PhysicalPage physicalPage, boolean newCompactFormat) {
+        super(physicalPage, newCompactFormat, getContentOffset(newCompactFormat));
+    }
 
-    public Supremum(PhysicalPage physicalPage) {
-        super(physicalPage, (short) OFFSET);
-        ByteBuffer buffer = physicalPage.getData(OFFSET + RecordHeader.LENGTH);
-        byte[] bytes = new byte[8];
-        buffer.get(bytes);
-        desc = new String(bytes, StandardCharsets.UTF_8);
+    private static int getContentOffset(boolean newCompactFormat) {
+        return newCompactFormat ? IndexPageBody.OFFSET + 2 * headerLength(true) + 8 :
+                IndexPageBody.OFFSET + 2 + 2 * headerLength(false) + 8;
     }
 
     @Override

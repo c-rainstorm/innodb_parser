@@ -6,6 +6,7 @@ import me.rainstorm.innodb.domain.tablespace.IndependentTableSpace;
 import me.rainstorm.innodb.parser.options.CommandLineArgs;
 import me.rainstorm.innodb.parser.options.CommandLineOptionEnum;
 import me.rainstorm.innodb.parser.strategy.cles.CommandLineExecuteStrategy;
+import me.rainstorm.innodb.parser.strategy.cles.level_1.HelpStrategy;
 
 import java.nio.file.Paths;
 
@@ -18,7 +19,7 @@ import static me.rainstorm.innodb.parser.ParserConstants.VERBOSE;
  */
 @Slf4j
 public class FilePerTableTableSpacePageExport extends CommandLineExecuteStrategy {
-    public static final int ORDER = FilePerTableTableSpacePages.ORDER - 1;
+    public static final int ORDER = HelpStrategy.ORDER - 100;
 
     public FilePerTableTableSpacePageExport() {
         setOrder(ORDER);

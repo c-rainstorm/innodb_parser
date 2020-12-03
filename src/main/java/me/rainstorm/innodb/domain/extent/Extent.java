@@ -6,6 +6,7 @@ import me.rainstorm.innodb.domain.page.LogicPage;
 import me.rainstorm.innodb.domain.page.LogicPageFactory;
 import me.rainstorm.innodb.domain.page.PhysicalPage;
 import me.rainstorm.innodb.domain.page.core.PageBody;
+import me.rainstorm.innodb.domain.page.core.SimplePage;
 import me.rainstorm.innodb.domain.page.xdes.AbstractExtentDescriptorPage;
 import me.rainstorm.innodb.domain.tablespace.TableSpace;
 
@@ -33,7 +34,7 @@ public class Extent {
         this.tableSpace = tableSpace;
         this.extentNo = extendOffset;
         this.data = data;
-        this.extentDescriptorPage = page(PAGE_NO_IN_EXTENT);
+        this.extentDescriptorPage = (extendOffset & 0xFF) == 0 ? page(PAGE_NO_IN_EXTENT) : null;
     }
 
     /**
@@ -47,6 +48,12 @@ public class Extent {
         PhysicalPage physicalPage = new PhysicalPage(this, pageOffsetInExtent,
                 ByteBuffer.wrap(data.array(), pageOffsetInExtent * PAGE_SIZE, PAGE_SIZE).asReadOnlyBuffer());
         return (Page) LogicPageFactory.of(physicalPage);
+    }
+
+    public SimplePage simplePage(int pageOffsetInExtent) {
+        PhysicalPage physicalPage = new PhysicalPage(this, pageOffsetInExtent,
+                ByteBuffer.wrap(data.array(), pageOffsetInExtent * PAGE_SIZE, PAGE_SIZE).asReadOnlyBuffer());
+        return new SimplePage(physicalPage);
     }
 
     public static int pageOffsetOfExtent(int pageNo) {

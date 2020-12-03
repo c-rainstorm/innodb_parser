@@ -81,7 +81,8 @@ public class FileSpaceHeaderPage extends AbstractExtentDescriptorPage<FileSpaceH
                             "WHERE ts.tsID = toInteger($tableSpaceId)\n" +
                             "MERGE (ts)-[r:contain]->(p)\n" +
                             "return r;",
-                    parameters("currentPage", getPageNo(), "tableSpaceId", getFileHeader().getTableSpaceId()));
+                    parameters("currentPage", getPageNo(),
+                            "tableSpaceId", getFileHeader().getTableSpaceId()));
 
             if (VERBOSE && log.isDebugEnabled() && result.hasNext()) {
                 log.debug("add page relation of ({})-[:contain]->({}) done.", getFileHeader().getTableSpaceId(), getPageNo());

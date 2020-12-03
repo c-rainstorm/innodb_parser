@@ -9,6 +9,7 @@ import java.nio.ByteBuffer;
  */
 @Getter
 public class SegmentPointer {
+    public static final int LENGTH = 10;
     private final int spaceId;
     private final int inodePageNo;
     private final short offset;

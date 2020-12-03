@@ -3,7 +3,8 @@ package me.rainstorm.innodb.domain.page.index;
 import lombok.Getter;
 import me.rainstorm.innodb.domain.page.PhysicalPage;
 import me.rainstorm.innodb.domain.page.core.FileHeader;
-import me.rainstorm.innodb.domain.page.index.record.RecordHeader;
+import me.rainstorm.innodb.domain.page.index.record.compact.CompactRecordHeader;
+import me.rainstorm.innodb.domain.page.index.record.redundant.RedundantRecordHeader;
 
 import java.nio.ByteBuffer;
 
@@ -128,6 +129,7 @@ public class IndexPageHeader {
     }
 
     public short getFirstRecordInDeletedList() {
-        return (short) (firstRecordInDeletedList - RecordHeader.LENGTH);
+        return (short) (firstRecordInDeletedList -
+                (newCompactFormat ? CompactRecordHeader.LENGTH : RedundantRecordHeader.LENGTH));
     }
 }

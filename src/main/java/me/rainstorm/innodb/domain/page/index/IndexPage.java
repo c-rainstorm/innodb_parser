@@ -4,10 +4,15 @@ import lombok.extern.slf4j.Slf4j;
 import me.rainstorm.innodb.common.neo4j.Neo4jHelper;
 import me.rainstorm.innodb.domain.page.LogicPage;
 import me.rainstorm.innodb.domain.page.PhysicalPage;
-import me.rainstorm.innodb.domain.page.index.record.Record;
+import me.rainstorm.innodb.domain.page.index.record.AbstractRecord;
+import me.rainstorm.innodb.domain.page.index.record.Infimum;
 import me.rainstorm.innodb.domain.page.index.record.RecordHeader;
+import me.rainstorm.innodb.domain.page.index.record.Supremum;
+import me.rainstorm.innodb.domain.page.index.record.compact.CompactRecord;
+import me.rainstorm.innodb.domain.page.index.record.compact.CompactRecordHeader;
 import me.rainstorm.innodb.domain.page.inode.InodePage;
 import me.rainstorm.innodb.domain.page.inode.SegmentEntry;
+import me.rainstorm.innodb.domain.tablespace.SystemTableSpace;
 import me.rainstorm.innodb.domain.tablespace.TableSpace;
 import org.neo4j.driver.Result;
 
@@ -17,10 +22,20 @@ import static me.rainstorm.innodb.parser.ParserConstants.VERBOSE;
 import static org.neo4j.driver.Values.parameters;
 
 /**
+ * 创建 Index 树的根节点
+ * storage/innobase/btr/btr0btr.cc
+ * btr_create
+ * <p>
+ * <p>
+ * ibuf: storage/innobase/include/ibuf0ibuf.h
+ *
  * @author traceless
+ * @see SystemTableSpace#FSP_IBUF_HEADER_PAGE_NO
+ * @see SystemTableSpace#FSP_IBUF_TREE_ROOT_PAGE_NO
  */
 @Slf4j
 public class IndexPage extends LogicPage<IndexPageBody> {
+
     public IndexPage(PhysicalPage physicalPage) {
         super(physicalPage);
     }
@@ -53,11 +68,11 @@ public class IndexPage extends LogicPage<IndexPageBody> {
                 fileHeader.getNextPageNo() == -1;
     }
 
-    private String getId(Record record) {
-        return getId(record.getOffset());
+    private String getId(AbstractRecord record) {
+        return getId(record.getRecordContentOffset());
     }
 
-    private String getId(short offset) {
+    private String getId(int offset) {
         return String.format("%s_%s", getPageNo(), offset);
     }
 
@@ -104,7 +119,7 @@ public class IndexPage extends LogicPage<IndexPageBody> {
 
 
     private void addNodeRecord(Neo4jHelper neo4jHelper) {
-        List<Record> records = body.getRecords();
+        List<AbstractRecord> records = body.getRecords();
         records.forEach(record -> {
             String id = getId(record);
             RecordHeader recordHeader = record.getRecordHeader();
@@ -117,12 +132,16 @@ public class IndexPage extends LogicPage<IndexPageBody> {
                                 " RETURN p;",
                         parameters("RecordID", id,
                                 "OwnNumber", recordHeader.getOwnNumber(),
-                                "RecordType", recordHeader.getRecordType().name(),
+                                "RecordType", record instanceof CompactRecord ?
+                                        ((CompactRecordHeader) recordHeader).getRecordType().name() :
+                                        record instanceof Infimum ? "R_Infimum" :
+                                                record instanceof Supremum ? "R_Supremum" :
+                                                        "R_Ordinary",
                                 "HeapNo", recordHeader.getIndexOfAllRecordsInThisPage()
                         ));
 
                 if (VERBOSE && log.isDebugEnabled() && result.hasNext()) {
-                    log.debug("add Record node of {} done.", getPageNo());
+                    log.debug("add Record node of {} done.", id);
                 }
                 return null;
             }));
@@ -138,7 +157,7 @@ public class IndexPage extends LogicPage<IndexPageBody> {
     }
 
     private void addLinkBetweenPageAndRecord(Neo4jHelper neo4jHelper) {
-        List<Record> records = body.getRecords();
+        List<AbstractRecord> records = body.getRecords();
         records.forEach(record -> {
             String recordId = getId(record);
             neo4jHelper.execute(session -> session.writeTransaction(tx -> {
@@ -161,7 +180,7 @@ public class IndexPage extends LogicPage<IndexPageBody> {
     }
 
     private void addLinkBetweenRecords(Neo4jHelper neo4jHelper) {
-        List<Record> records = body.getRecords();
+        List<AbstractRecord> records = body.getRecords();
         records.forEach(record -> {
             String recordId = getId(record);
             if (record.hasNext()) {

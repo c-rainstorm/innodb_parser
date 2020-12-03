@@ -7,10 +7,12 @@ import me.rainstorm.innodb.domain.page.core.SimplePage;
 import me.rainstorm.innodb.domain.page.fsp.FileSpaceHeaderPage;
 import me.rainstorm.innodb.domain.page.index.IndexPage;
 import me.rainstorm.innodb.domain.page.inode.InodePage;
+import me.rainstorm.innodb.domain.page.sys.DataDirectoryHeaderPage;
 import me.rainstorm.innodb.domain.page.xdes.ExtentDescriptorPage;
 
 import static me.rainstorm.innodb.common.i18n.I18nMsgCodeEnum.LogPageTypeDetailNotSupport;
 import static me.rainstorm.innodb.common.i18n.I18nUtil.message;
+import static me.rainstorm.innodb.domain.tablespace.SystemTableSpace.FSP_DICT_HDR_PAGE_NO;
 import static me.rainstorm.innodb.parser.ParserConstants.VERBOSE;
 
 /**
@@ -31,6 +33,13 @@ public class LogicPageFactory {
                 return new InodePage(physicalPage);
             case Index:
                 return new IndexPage(physicalPage);
+            case System:
+                switch (physicalPage.getPageNo()) {
+                    case FSP_DICT_HDR_PAGE_NO:
+                        return new DataDirectoryHeaderPage(physicalPage);
+                    default:
+                        return new SimplePage(physicalPage);
+                }
             default:
                 if (VERBOSE && log.isDebugEnabled()) {
                     log.debug(message(LogPageTypeDetailNotSupport, pageType));

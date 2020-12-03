@@ -3,24 +3,22 @@ package me.rainstorm.innodb.domain.page.index.record;
 import me.rainstorm.innodb.domain.page.PhysicalPage;
 import me.rainstorm.innodb.domain.page.index.IndexPageBody;
 
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-
 /**
+ * #define PAGE_OLD_INFIMUM	(PAGE_DATA + 1 + REC_N_OLD_EXTRA_BYTES)
+ * #define PAGE_NEW_INFIMUM	(PAGE_DATA + REC_N_NEW_EXTRA_BYTES)
+ *
  * @author traceless
  */
-public class Infimum extends Record {
+public class Infimum extends SpecialRecord {
     public static final int OFFSET = IndexPageBody.OFFSET;
-    public static final int LENGTH = RecordHeader.LENGTH + 8;
 
-    private final String desc;
+    public Infimum(PhysicalPage physicalPage, boolean newCompactFormat) {
+        super(physicalPage, newCompactFormat, getContentOffset(newCompactFormat));
+    }
 
-    public Infimum(PhysicalPage physicalPage) {
-        super(physicalPage, (short) OFFSET);
-        ByteBuffer buffer = physicalPage.getData(OFFSET + RecordHeader.LENGTH);
-        byte[] bytes = new byte[8];
-        buffer.get(bytes);
-        desc = new String(bytes, StandardCharsets.UTF_8);
+    private static int getContentOffset(boolean newCompactFormat) {
+        return newCompactFormat ? IndexPageBody.OFFSET + headerLength(true) :
+                IndexPageBody.OFFSET + 1 + headerLength(false);
     }
 
     @Override

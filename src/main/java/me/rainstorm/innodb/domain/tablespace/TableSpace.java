@@ -7,6 +7,7 @@ import me.rainstorm.innodb.domain.InnodbConstants;
 import me.rainstorm.innodb.domain.extent.Extent;
 import me.rainstorm.innodb.domain.page.LogicPage;
 import me.rainstorm.innodb.domain.page.core.PageBody;
+import me.rainstorm.innodb.domain.page.core.SimplePage;
 import me.rainstorm.innodb.domain.page.fsp.FileSpaceHeaderPage;
 
 import java.io.FileNotFoundException;
@@ -24,12 +25,29 @@ import static me.rainstorm.innodb.domain.extent.Extent.pageOffsetOfExtent;
 import static me.rainstorm.innodb.parser.ParserConstants.EXTEND_LRU_CACHE_SIZE;
 import static me.rainstorm.innodb.parser.ParserConstants.VERBOSE;
 
+
 /**
+ * fsp init
+ * storage/innobase/fsp/fsp0fsp.cc
+ * fsp_header_init
+ *
  * @author traceless
  */
 @Slf4j
 public abstract class TableSpace implements AutoCloseable {
     public static final int PAGE_ZERO = FileSpaceHeaderPage.PAGE_NO;
+    /**
+     * extent descriptor
+     */
+    public static final int FSP_XDES_OFFSET = 0;
+    /**
+     * insert buffer bitmap
+     */
+    public static final int FSP_IBUF_BITMAP_OFFSET = 1;
+    /**
+     * first inode page
+     */
+    public static final int FSP_FIRST_INODE_PAGE_NO = 2;
 
     private final FileChannel tableSpaceChannel;
     private final Path tableSpacePath;
@@ -77,6 +95,17 @@ public abstract class TableSpace implements AutoCloseable {
 
         Extent extent = extendLRUCache.computeIfAbsent(extendOffset, this::extend);
         return extent.page(pageOffsetInExtent);
+    }
+
+    public SimplePage simplePage(int pageNo) {
+        int extendOffset = extendOffsetOfTableSpace(pageNo);
+        int pageOffsetInExtent = pageOffsetOfExtent(pageNo);
+        if (VERBOSE && log.isDebugEnabled()) {
+            log.debug(message(LogPageLocate, pageNo, extendOffset, pageOffsetInExtent));
+        }
+
+        Extent extent = extendLRUCache.computeIfAbsent(extendOffset, this::extend);
+        return extent.simplePage(pageOffsetInExtent);
     }
 
     public Extent extend(int extendOffset) {
@@ -130,8 +159,8 @@ public abstract class TableSpace implements AutoCloseable {
     }
 
     class SequentialTraversalIterator implements Iterator<LogicPage<?>> {
-        private int currentPage;
-        private final int totalPage;
+        protected int currentPage;
+        protected final int totalPage;
 
         public SequentialTraversalIterator(int totalPage) {
             this.currentPage = -1;
