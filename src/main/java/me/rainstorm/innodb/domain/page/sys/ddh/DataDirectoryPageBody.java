@@ -1,7 +1,10 @@
-package me.rainstorm.innodb.domain.page.sys;
+package me.rainstorm.innodb.domain.page.sys.ddh;
 
 import lombok.Getter;
+import me.rainstorm.innodb.domain.page.PhysicalPage;
 import me.rainstorm.innodb.domain.page.core.FileHeader;
+import me.rainstorm.innodb.domain.page.core.PageBody;
+import me.rainstorm.innodb.domain.segment.SegmentPointer;
 
 import java.nio.ByteBuffer;
 
@@ -9,9 +12,8 @@ import java.nio.ByteBuffer;
  * @author traceless
  */
 @Getter
-public class DataDirectoryPageHeader {
+public class DataDirectoryPageBody extends PageBody {
     public static final int OFFSET = FileHeader.OFFSET + FileHeader.LENGTH;
-    public static final int LENGTH = 52;
 
     private final long maxRowId;
     private final long maxTableId;
@@ -24,7 +26,11 @@ public class DataDirectoryPageHeader {
     private final int sysIndexesPrimaryIndexRootPage;
     private final int sysFieldsPrimaryIndexRootPage;
 
-    public DataDirectoryPageHeader(ByteBuffer buffer) {
+    private final SegmentPointer segmentPointer;
+
+    public DataDirectoryPageBody(PhysicalPage physicalPage) {
+        ByteBuffer buffer = physicalPage.getData(OFFSET);
+
         maxRowId = buffer.getLong();
         maxTableId = buffer.getLong();
         maxIndexId = buffer.getLong();
@@ -35,5 +41,7 @@ public class DataDirectoryPageHeader {
         sysColumnsPrimaryIndexRootPage = buffer.getInt();
         sysIndexesPrimaryIndexRootPage = buffer.getInt();
         sysFieldsPrimaryIndexRootPage = buffer.getInt();
+        buffer.getInt();
+        segmentPointer = new SegmentPointer(buffer);
     }
 }

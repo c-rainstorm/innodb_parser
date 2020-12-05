@@ -10,10 +10,7 @@ import me.rainstorm.innodb.domain.page.index.record.RecordHeader;
 import me.rainstorm.innodb.domain.page.index.record.Supremum;
 import me.rainstorm.innodb.domain.page.index.record.compact.CompactRecord;
 import me.rainstorm.innodb.domain.page.index.record.compact.CompactRecordHeader;
-import me.rainstorm.innodb.domain.page.inode.InodePage;
-import me.rainstorm.innodb.domain.page.inode.SegmentEntry;
 import me.rainstorm.innodb.domain.tablespace.SystemTableSpace;
-import me.rainstorm.innodb.domain.tablespace.TableSpace;
 import org.neo4j.driver.Result;
 
 import java.util.List;
@@ -204,44 +201,10 @@ public class IndexPage extends LogicPage<IndexPageBody> {
     }
 
     private void addLinkSegments(Neo4jHelper neo4jHelper) {
-        if (isRoot()) {
-            TableSpace tableSpace = extent().getTableSpace();
+        if (isRoot() && SystemTableSpace.FSP_IBUF_TREE_ROOT_PAGE_NO != getFileHeader().getPageNo()) {
             IndexPageHeader indexPageHeader = body.getPageHeader();
-
-            SegmentPointer leafSegmentPointer = indexPageHeader.getLeafSegmentPagePointer();
-            assert tableSpace.tableSpaceId() == leafSegmentPointer.getSpaceId();
-            SegmentEntry leafSegment = segmentEntry(tableSpace, leafSegmentPointer.getInodePageNo(), leafSegmentPointer.getOffset());
-            doLinkSegment(leafSegment, "leafSegment", neo4jHelper);
-
-            SegmentPointer nonLeafSegmentPointer = indexPageHeader.getNonLeafSegmentPagePointer();
-            assert tableSpace.tableSpaceId() == nonLeafSegmentPointer.getSpaceId();
-            SegmentEntry nonLeafSegment = segmentEntry(tableSpace, nonLeafSegmentPointer.getInodePageNo(), nonLeafSegmentPointer.getOffset());
-            doLinkSegment(nonLeafSegment, "nonLeafSegment", neo4jHelper);
+            doLinkSegment(indexPageHeader.getLeafSegmentPagePointer(), "leafSegment", neo4jHelper);
+            doLinkSegment(indexPageHeader.getNonLeafSegmentPagePointer(), "nonLeafSegment", neo4jHelper);
         }
-    }
-
-    private void doLinkSegment(SegmentEntry segment, String segmentType, Neo4jHelper neo4jHelper) {
-        neo4jHelper.execute(session -> session.writeTransaction(tx -> {
-            tx.run("MERGE (s:Segment {segID: toInteger($SegmentID)})\n" +
-                            "SET s.SegmentType = $SegmentType\n" +
-                            "return s;",
-                    parameters("SegmentID", segment.getSegmentId(),
-                            "SegmentType", segmentType));
-
-            tx.run("MATCH (s:Segment)\n" +
-                            "WHERE s.segID = toInteger($SegmentID)\n" +
-                            "MATCH (p:Page)\n" +
-                            "WHERE p.pID = toInteger($PageID)\n" +
-                            "MERGE (p)-[r:" + segmentType + "]->(s)\n" +
-                            "return r;",
-                    parameters("SegmentID", segment.getSegmentId(),
-                            "PageID", getPageNo()));
-            return null;
-        }));
-    }
-
-    private SegmentEntry segmentEntry(TableSpace tableSpace, int pageNo, short offset) {
-        InodePage inodePage = tableSpace.page(pageNo);
-        return inodePage.getSegmentEntry(offset);
     }
 }

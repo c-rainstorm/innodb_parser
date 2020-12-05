@@ -8,6 +8,7 @@ import me.rainstorm.innodb.domain.page.core.FileTrailer;
 import me.rainstorm.innodb.domain.page.core.PageBody;
 import me.rainstorm.innodb.domain.page.core.list.ListNode;
 import me.rainstorm.innodb.domain.page.fsp.FileSpaceHeader;
+import me.rainstorm.innodb.domain.segment.SegmentEntry;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;

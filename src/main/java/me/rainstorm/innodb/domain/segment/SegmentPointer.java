@@ -1,4 +1,4 @@
-package me.rainstorm.innodb.domain.page.index;
+package me.rainstorm.innodb.domain.segment;
 
 import lombok.Getter;
 

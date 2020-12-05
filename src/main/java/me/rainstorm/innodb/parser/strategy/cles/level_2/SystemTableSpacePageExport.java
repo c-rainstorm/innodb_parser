@@ -32,6 +32,7 @@ public class SystemTableSpacePageExport extends CommandLineExecuteStrategy {
     @Override
     public void execute(CommandLineArgs commandLineArgs) {
         SystemTableSpace systemTableSpace = new SystemTableSpace(commandLineArgs.systemTableSpace());
+        systemTableSpace.init();
         if (VERBOSE && log.isDebugEnabled()) {
             log.debug(message(LogTableSpaceSummary, systemTableSpace,
                     systemTableSpace.totalExtentNumber(),

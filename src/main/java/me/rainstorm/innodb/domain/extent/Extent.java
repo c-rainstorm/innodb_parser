@@ -47,7 +47,7 @@ public class Extent {
     public <Page extends LogicPage<? extends PageBody>> Page page(int pageOffsetInExtent) {
         PhysicalPage physicalPage = new PhysicalPage(this, pageOffsetInExtent,
                 ByteBuffer.wrap(data.array(), pageOffsetInExtent * PAGE_SIZE, PAGE_SIZE).asReadOnlyBuffer());
-        return (Page) LogicPageFactory.of(physicalPage);
+        return (Page) LogicPageFactory.of(tableSpace, physicalPage);
     }
 
     public SimplePage simplePage(int pageOffsetInExtent) {

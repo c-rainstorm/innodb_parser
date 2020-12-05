@@ -1,7 +1,9 @@
-package me.rainstorm.innodb.domain.page.inode;
+package me.rainstorm.innodb.domain.segment;
 
 import lombok.Getter;
 import me.rainstorm.innodb.domain.page.core.list.ListBaseNode;
+import me.rainstorm.innodb.domain.page.inode.InodePage;
+import me.rainstorm.innodb.domain.tablespace.TableSpace;
 
 import java.nio.ByteBuffer;
 

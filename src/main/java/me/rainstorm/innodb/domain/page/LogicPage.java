@@ -7,6 +7,9 @@ import me.rainstorm.innodb.domain.extent.Extent;
 import me.rainstorm.innodb.domain.page.core.FileHeader;
 import me.rainstorm.innodb.domain.page.core.FileTrailer;
 import me.rainstorm.innodb.domain.page.core.PageBody;
+import me.rainstorm.innodb.domain.page.inode.InodePage;
+import me.rainstorm.innodb.domain.segment.SegmentEntry;
+import me.rainstorm.innodb.domain.segment.SegmentPointer;
 import me.rainstorm.innodb.domain.tablespace.TableSpace;
 import org.apache.commons.lang3.StringUtils;
 import org.neo4j.driver.Result;
@@ -93,13 +96,17 @@ public abstract class LogicPage<Body extends PageBody> {
             Result result = tx.run("MERGE (p:Page {pID: toInteger($pageNo)})\n" +
                             "SET p.pageType=$pageType" +
                             " RETURN p;",
-                    parameters("pageNo", getPageNo(), "pageType", pageType().name()));
+                    parameters("pageNo", getPageNo(), "pageType", getPageType()));
 
             if (VERBOSE && log.isDebugEnabled() && result.hasNext()) {
                 log.debug("add page node of {} done.", getPageNo());
             }
             return null;
         }));
+    }
+
+    protected String getPageType() {
+        return pageType().name();
     }
 
     private void addNodePageFileHeader(Neo4jHelper neo4jHelper) {
@@ -215,5 +222,33 @@ public abstract class LogicPage<Body extends PageBody> {
             }
             return null;
         }));
+    }
+
+    protected void doLinkSegment(SegmentPointer segmentPointer, String segmentType, Neo4jHelper neo4jHelper) {
+        SegmentEntry segmentEntry = segmentEntry(segmentPointer);
+        neo4jHelper.execute(session -> session.writeTransaction(tx -> {
+            tx.run("MERGE (s:Segment {segID: toInteger($SegmentID)})\n" +
+                            "SET s.SegmentType = $SegmentType\n" +
+                            "return s;",
+                    parameters("SegmentID", segmentEntry.getSegmentId(),
+                            "SegmentType", segmentType));
+
+            tx.run("MATCH (s:Segment)\n" +
+                            "WHERE s.segID = toInteger($SegmentID)\n" +
+                            "MATCH (p:Page)\n" +
+                            "WHERE p.pID = toInteger($PageID)\n" +
+                            "MERGE (p)-[r:" + segmentType + "]->(s)\n" +
+                            "return r;",
+                    parameters("SegmentID", segmentEntry.getSegmentId(),
+                            "PageID", getPageNo()));
+            return null;
+        }));
+    }
+
+    protected SegmentEntry segmentEntry(SegmentPointer segmentPointer) {
+        TableSpace tableSpace = extent().getTableSpace();
+        assert tableSpace.tableSpaceId() == segmentPointer.getSpaceId();
+        InodePage inodePage = tableSpace.page(segmentPointer.getInodePageNo());
+        return inodePage.getSegmentEntry(segmentPointer.getOffset());
     }
 }

@@ -5,6 +5,7 @@ import me.rainstorm.innodb.domain.page.PhysicalPage;
 import me.rainstorm.innodb.domain.page.core.FileHeader;
 import me.rainstorm.innodb.domain.page.index.record.compact.CompactRecordHeader;
 import me.rainstorm.innodb.domain.page.index.record.redundant.RedundantRecordHeader;
+import me.rainstorm.innodb.domain.segment.SegmentPointer;
 
 import java.nio.ByteBuffer;
 

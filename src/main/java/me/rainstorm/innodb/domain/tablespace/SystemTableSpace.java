@@ -1,13 +1,15 @@
 package me.rainstorm.innodb.domain.tablespace;
 
+import lombok.Getter;
 import me.rainstorm.innodb.domain.page.LogicPage;
-import me.rainstorm.innodb.domain.page.sys.DataDirectoryHeaderPage;
-import me.rainstorm.innodb.domain.page.sys.DataDirectoryPageHeader;
+import me.rainstorm.innodb.domain.page.sys.ddh.DataDirectoryHeaderPage;
+import me.rainstorm.innodb.domain.page.sys.ddh.DataDirectoryPageBody;
+import me.rainstorm.innodb.domain.page.trxsys.TransactionSystemPage;
 
 import java.nio.file.Path;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.TreeSet;
 
 /**
  * @author traceless
@@ -44,7 +46,10 @@ public class SystemTableSpace extends TableSpace {
      */
     public static final int FSP_DICT_HDR_PAGE_NO = 7;
 
-    Set<Integer> allPageNeedProcess = new TreeSet<>();
+    Set<Integer> allPageNeedProcess = new LinkedHashSet<>();
+
+    @Getter
+    private TransactionSystemPage transactionSystemPage;
 
     public SystemTableSpace(Path tableSpacePath) {
         super(tableSpacePath, tableSpacePath);
@@ -52,18 +57,22 @@ public class SystemTableSpace extends TableSpace {
         for (int i = 0; i <= FSP_DICT_HDR_PAGE_NO; ++i) {
             allPageNeedProcess.add(i);
         }
-
-        DataDirectoryHeaderPage dataDirectoryHeaderPage = page(FSP_DICT_HDR_PAGE_NO);
-        DataDirectoryPageHeader dataDirectoryPageHeader = dataDirectoryHeaderPage.getBody().getDataDirectoryPageHeader();
-        allPageNeedProcess.add(dataDirectoryPageHeader.getSysTablesPrimaryIndexRootPage());
-        allPageNeedProcess.add(dataDirectoryPageHeader.getSysTablesSecondaryIndexForIdRootPage());
-        allPageNeedProcess.add(dataDirectoryPageHeader.getSysIndexesPrimaryIndexRootPage());
-        allPageNeedProcess.add(dataDirectoryPageHeader.getSysFieldsPrimaryIndexRootPage());
-        allPageNeedProcess.add(dataDirectoryPageHeader.getSysColumnsPrimaryIndexRootPage());
-
-        allPageNeedProcess.remove(FSP_IBUF_TREE_ROOT_PAGE_NO);
+        allPageNeedProcess.remove(FSP_FIRST_RSEG_PAGE_NO);
     }
 
+    public void init() {
+        transactionSystemPage = page(FSP_TRX_SYS_PAGE_NO);
+        transactionSystemPage.getBody().getTrxSysHeader().rollbackSegmentSlots()
+                .mapToInt(Long::intValue).forEach(allPageNeedProcess::add);
+
+        DataDirectoryHeaderPage dataDirectoryHeaderPage = page(FSP_DICT_HDR_PAGE_NO);
+        DataDirectoryPageBody dataDirectoryPageBody = dataDirectoryHeaderPage.getBody();
+        allPageNeedProcess.add(dataDirectoryPageBody.getSysTablesPrimaryIndexRootPage());
+        allPageNeedProcess.add(dataDirectoryPageBody.getSysTablesSecondaryIndexForIdRootPage());
+        allPageNeedProcess.add(dataDirectoryPageBody.getSysIndexesPrimaryIndexRootPage());
+        allPageNeedProcess.add(dataDirectoryPageBody.getSysFieldsPrimaryIndexRootPage());
+        allPageNeedProcess.add(dataDirectoryPageBody.getSysColumnsPrimaryIndexRootPage());
+    }
 
     @Override
     public Iterator<LogicPage<?>> sequentialTraversalIterator() {
