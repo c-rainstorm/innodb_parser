@@ -8,6 +8,16 @@ import me.rainstorm.innodb.domain.page.index.record.redundant.RedundantRecord;
 import me.rainstorm.innodb.domain.page.index.record.redundant.RedundantRecordHeader;
 
 /**
+ * trx_undo_decode_roll_ptr
+ * <p>
+ * offset = (ulint) roll_ptr & 0xFFFF; roll_ptr >>= 16;
+ * <p>
+ * page_no = (ulint) roll_ptr & 0xFFFFFFFF; roll_ptr >>= 32;
+ * <p>
+ * rseg_id = (ulint) roll_ptr & 0x7F; roll_ptr >>= 7;
+ * <p>
+ * is_insert = (ibool) roll_ptr;
+ *
  * @author traceless
  */
 @Getter
