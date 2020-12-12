@@ -128,9 +128,4 @@ public class IndexPageHeader {
         leafSegmentPagePointer = new SegmentPointer(buffer);
         nonLeafSegmentPagePointer = new SegmentPointer(buffer);
     }
-
-    public short getFirstRecordInDeletedList() {
-        return (short) (firstRecordInDeletedList -
-                (newCompactFormat ? CompactRecordHeader.LENGTH : RedundantRecordHeader.LENGTH));
-    }
 }

@@ -49,7 +49,7 @@ public class FileHeader {
      */
     private final PageTypeEnum pageType;
     /**
-     * 最后刷盘的LSN，仅系统表空间某个页有效
+     * 最后刷盘的LSN，仅系统表空间第一个数据文件的FSP页有效
      */
     private final long lastFlushedLogSequenceNumber;
 

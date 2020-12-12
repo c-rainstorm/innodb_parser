@@ -51,7 +51,7 @@ public class IndexPageBody extends PageBody {
         AbstractRecord r = infimum;
         while (r.hasNext()) {
             records.add(r);
-            r = nextRecord(physicalPage, r.next());
+            r = r.nextRecord(physicalPage);
         }
         records.add(supremum);
 
@@ -59,7 +59,7 @@ public class IndexPageBody extends PageBody {
             r = nextRecord(physicalPage, pageHeader.getFirstRecordInDeletedList());
             deletedRecords.add(r);
             while (r.hasNext()) {
-                AbstractRecord record = nextRecord(physicalPage, r.next());
+                AbstractRecord record = r.nextRecord(physicalPage);
                 deletedRecords.add(record);
                 r = record;
             }

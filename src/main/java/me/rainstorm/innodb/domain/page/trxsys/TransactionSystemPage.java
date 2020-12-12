@@ -38,7 +38,7 @@ public class TransactionSystemPage extends LogicPage<TransactionSystemPageBody> 
     }
 
     public boolean isRollbackSegment(int pageNo) {
-        return body.getTrxSysHeader().rollbackSegmentSlots().anyMatch(x -> x == pageNo);
+        return body.getTrxSysHeader().rollbackSegmentPointers().anyMatch(x -> x.getPageNo() == pageNo);
     }
 
     @Override
@@ -118,7 +118,7 @@ public class TransactionSystemPage extends LogicPage<TransactionSystemPageBody> 
     }
 
     private void addLinkBetweenRollbackSegmentPageAndTrxSysPage(Neo4jHelper neo4jHelper) {
-        body.getTrxSysHeader().rollbackSegmentSlots().forEach(rollbackSegmentPageNo ->
+        body.getTrxSysHeader().rollbackSegmentPointers().forEach(rollbackSegmentPageNo ->
                 neo4jHelper.execute(session -> session.writeTransaction(tx -> {
                     tx.run("MATCH (rp:Page)\n" +
                                     "WHERE rp.pID = toInteger($RollbackSegmentPage)\n" +
@@ -126,7 +126,7 @@ public class TransactionSystemPage extends LogicPage<TransactionSystemPageBody> 
                                     "WHERE tp.pID = toInteger($pageNo)\n" +
                                     "MERGE (tp)-[r:rollback_segment_page]->(rp)\n" +
                                     "return r;",
-                            parameters("RollbackSegmentPage", rollbackSegmentPageNo,
+                            parameters("RollbackSegmentPage", rollbackSegmentPageNo.getPageNo(),
                                     "pageNo", fileHeader.getPageNo()));
                     return null;
                 })));

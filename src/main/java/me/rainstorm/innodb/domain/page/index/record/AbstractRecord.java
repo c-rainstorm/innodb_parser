@@ -2,7 +2,9 @@ package me.rainstorm.innodb.domain.page.index.record;
 
 import lombok.Getter;
 import me.rainstorm.innodb.domain.page.PhysicalPage;
+import me.rainstorm.innodb.domain.page.index.record.compact.CompactRecord;
 import me.rainstorm.innodb.domain.page.index.record.compact.CompactRecordHeader;
+import me.rainstorm.innodb.domain.page.index.record.redundant.RedundantRecord;
 import me.rainstorm.innodb.domain.page.index.record.redundant.RedundantRecordHeader;
 
 /**
@@ -37,5 +39,10 @@ public abstract class AbstractRecord {
 
     public static int headerLength(boolean newCompactFormat) {
         return newCompactFormat ? CompactRecordHeader.LENGTH : RedundantRecordHeader.LENGTH;
+    }
+
+    public AbstractRecord nextRecord(PhysicalPage physicalPage) {
+        return newCompactFormat ? new CompactRecord(physicalPage, next()) :
+                new RedundantRecord(physicalPage, next());
     }
 }

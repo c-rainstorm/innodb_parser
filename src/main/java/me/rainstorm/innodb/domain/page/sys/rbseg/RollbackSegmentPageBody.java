@@ -10,6 +10,8 @@ import me.rainstorm.innodb.domain.segment.SegmentPointer;
 import java.nio.ByteBuffer;
 
 /**
+ * DB_TOO_MANY_CONCURRENT_TRXS
+ *
  * @author traceless
  */
 @Getter

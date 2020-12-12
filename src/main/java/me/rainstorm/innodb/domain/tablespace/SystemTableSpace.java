@@ -4,6 +4,7 @@ import lombok.Getter;
 import me.rainstorm.innodb.domain.page.LogicPage;
 import me.rainstorm.innodb.domain.page.sys.ddh.DataDirectoryHeaderPage;
 import me.rainstorm.innodb.domain.page.sys.ddh.DataDirectoryPageBody;
+import me.rainstorm.innodb.domain.page.sys.rbseg.RollbackSegmentPagePointer;
 import me.rainstorm.innodb.domain.page.trxsys.TransactionSystemPage;
 
 import java.nio.file.Path;
@@ -62,8 +63,8 @@ public class SystemTableSpace extends TableSpace {
 
     public void init() {
         transactionSystemPage = page(FSP_TRX_SYS_PAGE_NO);
-        transactionSystemPage.getBody().getTrxSysHeader().rollbackSegmentSlots()
-                .mapToInt(Long::intValue).forEach(allPageNeedProcess::add);
+        transactionSystemPage.getBody().getTrxSysHeader().rollbackSegmentPointers()
+                .mapToInt(RollbackSegmentPagePointer::getPageNo).forEach(allPageNeedProcess::add);
 
         DataDirectoryHeaderPage dataDirectoryHeaderPage = page(FSP_DICT_HDR_PAGE_NO);
         DataDirectoryPageBody dataDirectoryPageBody = dataDirectoryHeaderPage.getBody();

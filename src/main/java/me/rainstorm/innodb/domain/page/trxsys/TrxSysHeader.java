@@ -3,6 +3,7 @@ package me.rainstorm.innodb.domain.page.trxsys;
 import lombok.Getter;
 import me.rainstorm.innodb.domain.page.PhysicalPage;
 import me.rainstorm.innodb.domain.page.core.PageBody;
+import me.rainstorm.innodb.domain.page.sys.rbseg.RollbackSegmentPagePointer;
 import me.rainstorm.innodb.domain.segment.SegmentPointer;
 
 import java.nio.ByteBuffer;
@@ -30,7 +31,7 @@ public class TrxSysHeader {
      */
     private final SegmentPointer segmentBelongTo;
 
-    private final long[] rollbackSegmentSlots = new long[ROLLBACK_SEGMENT_SLOT_N];
+    private final RollbackSegmentPagePointer[] rollbackSegmentSlots = new RollbackSegmentPagePointer[ROLLBACK_SEGMENT_SLOT_N];
 
     public TrxSysHeader(PhysicalPage physicalPage) {
         ByteBuffer buffer = physicalPage.getData(OFFSET);
@@ -38,11 +39,11 @@ public class TrxSysHeader {
         maxTransactionId = buffer.getLong();
         segmentBelongTo = new SegmentPointer(buffer);
         for (int i = 0; i < ROLLBACK_SEGMENT_SLOT_N; i++) {
-            rollbackSegmentSlots[i] = buffer.getLong();
+            rollbackSegmentSlots[i] = new RollbackSegmentPagePointer(buffer);
         }
     }
 
-    public Stream<Long> rollbackSegmentSlots() {
-        return Arrays.stream(rollbackSegmentSlots).boxed().filter(x -> x != -1);
+    public Stream<RollbackSegmentPagePointer> rollbackSegmentPointers() {
+        return Arrays.stream(rollbackSegmentSlots).filter(RollbackSegmentPagePointer::isValid);
     }
 }

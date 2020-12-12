@@ -16,9 +16,4 @@ public class RedundantRecord extends AbstractRecord {
     protected RecordHeader loadRecordHeader(PhysicalPage physicalPage, int recordContentOffset) {
         return new RedundantRecordHeader(physicalPage, loadRecordMetaDataOffset(recordContentOffset));
     }
-
-    @Override
-    public int next() {
-        return recordHeader.getNextRecordOffset();
-    }
 }
